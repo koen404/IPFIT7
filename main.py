@@ -1,5 +1,6 @@
 import logger
 import os
+import sys
 import DA_backup
 class Main:
 
@@ -38,6 +39,10 @@ class Main:
         username = 'admin'
         password = input('please enter password')
         host = input('please enter host')
+
+    def quit(self):
+        self.Log().info("Exiting script")
+        sys.exit(0)
 
 
 if __name__ == "__main__":
