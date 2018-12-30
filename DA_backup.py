@@ -51,7 +51,3 @@ class DA_backup:
 
 
 
-    username = 'admin'
-    password = input('please enter password')
-    host = input ('please enter host')
-    download(username,password,host)
