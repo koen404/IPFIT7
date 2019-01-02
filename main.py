@@ -7,10 +7,13 @@ import hashlib as hash
 import DA_backup
 import File_extraction
 import csv
+import getpass
+
 
 class Main:
     BUFFERSIZE = 65536
     download_path = os.path.join(sys.path[0], "download")
+
     def __init__(self):
         log_path = os.path.join(sys.path[0], "log")
 
@@ -83,16 +86,15 @@ class Main:
                 print("{0} is not a valid choice".format(choice))
 
     def create_back_up(self):
-        username = 'admin'
+        username = 'koen'
         sshpassword = input('Please enter the SSH password: ')
         host = input('please enter host')
         user = input('please enter the user which you want to creat the back-up from')
         self.DA.back_up(host, username, sshpassword)
 
-
     def download_back_up(self):
         username = 'admin'
-        ftppassword = input('Please enter the FTP password: ')
+        ftppassword = input('FTP_password:')
         host = input('please enter host')
         self.DA.download(username, ftppassword, host)
 
