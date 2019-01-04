@@ -86,11 +86,12 @@ class Main:
                 print("{0} is not a valid choice".format(choice))
 
     def create_back_up(self):
+        # username is set statically for testing reasons but needs tp be changed to input.
         username = 'koen'
+        host = input('please enter the DirectAdmin host: ')
         sshpassword = input('Please enter the SSH password: ')
-        host = input('please enter host')
-        user = input('please enter the user which you want to creat the back-up from')
-        self.DA.back_up(host, username, sshpassword)
+        backupuser = input('Please enter the user of which you want to create the back-up from:')
+        self.DA.back_up(host, username, sshpassword, backupuser)
 
     def download_back_up(self):
         username = 'admin'
