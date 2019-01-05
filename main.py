@@ -12,24 +12,34 @@ import getpass
 
 class Main:
     BUFFERSIZE = 65536
-    download_path = os.path.join(sys.path[0], "download")
-
+    extract_path = None
     def __init__(self):
         log_path = os.path.join(sys.path[0], "log")
-
         self.sha256hash = hash.sha256()
+        self.examiner = None
+        self.casenumber = None
+        self.casename = None
+        self.download_path = None
+        self.casedir = None
+        self.extract_path = None
+        self.coe_output_file = None
+        self.coepath = os.path.join(sys.path[0], '.coe')
+        self.case_path = os.path.join(sys.path[0], 'cases')
         if not os.path.exists(log_path):
             os.makedirs(log_path)
+        if not os.path.exists(self.case_path):
+            os.makedirs(self.case_path)
 
-        if not os.path.exists(self.download_path):
-            os.makedirs(self.download_path)
+        # if not os.path.exists(self.download_path):
+        #     os.makedirs(self.download_path)
 
         self.log_location = os.path.join(sys.path[0], 'log', 'Main_log_' + str(date.today()) + '.log')
         self.choices_main = {
                 "1": self.create_back_up,
                 "2": self.download_back_up,
                 "3": self.file_extraction,
-                "4": self.quit
+                "4": self.mail_analysis,
+                "5": self.quit
 
                 }
 
@@ -54,7 +64,8 @@ class Main:
         1. Create_back-up
         2. Download_Back-up
         3. File_extraction
-        4. Quit
+        4. Mail_analysis
+        5. Quit
         """)
 
     def bereken_hash(self, file):
@@ -70,6 +81,15 @@ class Main:
         return str(self.sha256hash.hexdigest())
 
     def run(self):
+        if not os.path.exists(self.coepath):
+            f = open(self.coepath, "w+")
+            f.close()
+            self.coe()
+
+            self.download_path = os.path.join(self.casedir, 'download')
+            if not os.path.exists(self.download_path):
+                os.makedirs(self.download_path)
+            self.extract_path = os.path.join(self.casedir, 'extract')
 
         self.Log().info("Starting Main_Script")
 
@@ -97,13 +117,41 @@ class Main:
         username = 'admin'
         ftppassword = input('FTP_password:')
         host = input('please enter host')
-        self.DA.download(username, ftppassword, host)
+        self.DA.download(username, ftppassword, host, self.download_path)
 
     def file_extraction(self):
         filename = input("please enter the tar.gz file you want to extract (press * for all):")
-        File_extraction.FileExtraction().extract(filename)
+        File_extraction.FileExtraction().extract(filename, self.extract_path, self.download_path)
+
+    def coe(self):
+        self.examiner = input('Please enter your name:')
+        self.casenumber = input('Please enter the casenumber:')
+        self.casename = input('please enter a case name (press enter if none):')
+        self.casedir = os.path.join(self.case_path, self.casenumber + '_' + self.casename)
+        if not os.path.exists(self.casedir):
+            os.makedirs(self.casedir)
+        self.coe_output_file = os.path.join(self.casedir, 'coe.csv')
+        if not os.path.exists(self.coe_output_file):
+            with open(self.coe_output_file, 'w') as file:
+                filewriter = csv.writer(file, delimiter=',',
+                                        quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                filewriter.writerow(['Examiner', self.examiner])
+                filewriter.writerow(['Case number', self.casenumber])
+                filewriter.writerow(['Case Name', self.casename])
+                filewriter.writerow(['What', 'When'])
+        else:
+            print('Using existing coe file: ' + self.coe_output_file)
+
+    # TODO: create a maildir analysis script
+    def mail_analysis(self):
+        print('mail analysis')
+
+    #TODO: create a script to analyse .sql files
+    def database_analysis(self):
+        print('Database analysis')
 
     def quit(self):
+        os.remove(self.coepath)
         self.Log().info("Exiting script")
         sys.exit(0)
 
