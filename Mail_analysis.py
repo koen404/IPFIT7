@@ -19,15 +19,19 @@ class Mail_analysis:
         thirdfolder = self.listdir(nextfolder, 'Please enter the index of the domain you want to analyse the mail from')
         self.maildir = self.listdir(thirdfolder, 'Please enter the index of the maildir you want to analyse')
         print(self.maildir)
+        self.showmail(self.maildir)
 
-
-    def showmail(self):
+    # TODO test this function with a know good maildir,because it looks like this function doesn't work as it suposed to
+    def showmail(self, maildir):
+        mbox = mailbox.Maildir(os.path.join(maildir, 'Maildir','.Sent'))
+        mbox.lock()
+        for message in mbox:
+            print(message)
         print('')
 
     def listdir(self, path, input_question):
         dir_list = os.listdir(path)
         print(path)
-        print (len(dir_list))
         i = 0
         for file in dir_list:
 
