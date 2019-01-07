@@ -7,6 +7,7 @@ import hashlib as hash
 import DA_backup
 import File_extraction
 import csv
+import Mail_analysis
 import getpass
 
 
@@ -19,9 +20,7 @@ class Main:
         self.examiner = None
         self.casenumber = None
         self.casename = None
-        self.download_path = None
         self.casedir = None
-        self.extract_path = None
         self.coe_output_file = None
         self.coepath = os.path.join(sys.path[0], '.coe')
         self.case_path = os.path.join(sys.path[0], 'cases')
@@ -81,15 +80,13 @@ class Main:
         return str(self.sha256hash.hexdigest())
 
     def run(self):
-        if not os.path.exists(self.coepath):
-            f = open(self.coepath, "w+")
-            f.close()
-            self.coe()
 
-            self.download_path = os.path.join(self.casedir, 'download')
-            if not os.path.exists(self.download_path):
-                os.makedirs(self.download_path)
-            self.extract_path = os.path.join(self.casedir, 'extract')
+        self.coe()
+
+        self.download_path = os.path.join(self.casedir, 'download')
+        if not os.path.exists(self.download_path):
+            os.makedirs(self.download_path)
+        self.extract_path = os.path.join(self.casedir, 'extract')
 
         self.Log().info("Starting Main_Script")
 
@@ -117,10 +114,15 @@ class Main:
         username = 'admin'
         ftppassword = input('FTP_password:')
         host = input('please enter host')
-        self.DA.download(username, ftppassword, host, self.download_path)
+        self.DA.download_backup(username, ftppassword, host, self.download_path)
+
+    def download_logs(self):
+        print('')
 
     def file_extraction(self):
         filename = input("please enter the tar.gz file you want to extract (press * for all):")
+        print(self.extract_path)
+        print(self.download_path)
         File_extraction.FileExtraction().extract(filename, self.extract_path, self.download_path)
 
     def coe(self):
@@ -145,6 +147,8 @@ class Main:
     # TODO: create a maildir analysis script
     def mail_analysis(self):
         print('mail analysis')
+        Mail_analysis.Mail_analysis().load_maildir(self.extract_path)
+
 
     #TODO: create a script to analyse .sql files
     def database_analysis(self):
