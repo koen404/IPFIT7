@@ -1,5 +1,4 @@
 import paramiko
-import sys
 import ftplib
 import os
 import main
@@ -7,7 +6,6 @@ import csv
 from contextlib import closing
 from time import gmtime, strftime
 import Write_to_coe
-from scp import SCPClient
 class DA_backup:
     def __init__(self):
         self.client = None
@@ -15,39 +13,50 @@ class DA_backup:
         self.main = main.Main()
         self.shell = None
 
-    def back_up(self, host, username, password,coe_output_file, backupuser = None ):
+    # function to create an back-up on the DA server. Will need the username hostname and password
+    def back_up(self, host, username, password, coe_output_file, backupuser=None):
         self.coe_output_file = coe_output_file
+        # instantiate the paramiko ssh client
         self.client = paramiko.SSHClient()
+        # this will automatically add the host keys of the server.
+        # If the keys aren't present paramiko will raise an error
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
+            # write COE info to the coe output file
             message = 'Connecting to:' + host
             Write_to_coe.write_to_coe(self.coe_output_file, message)
+            # connect with the SSH host
             self.client.connect(hostname=host, port=13370, username=username, password=password)
             # TODO: move all input to main class
-            rootPass = input('Please enter the root password of the server:')
-            print(backupuser)
-            if backupuser!= '':
-                print('back-up user not empty')
+            # ask for root pass
+            root_pass = input('Please enter the root password of the server:')
+            if backupuser != '':
                 message = 'Creating back-up for user: ' + backupuser
                 Write_to_coe.write_to_coe(self.coe_output_file, message)
+                # This command will create a back-up for a specific user.
                 backupcommand = 'echo \'action=backup&append%5Fto%5Fpath=nothing&database%5Fdata%5Faware=yes&email%5Fdata%5Faware=yes&local%5Fpath=%2Fhome%2Fadmin%2Fadmin%5Fbackups&owner=admin&select%30='+ backupuser +'&type=admin&value=multiple&when=now&where=local\' >> /usr/local/directadmin/data/task.queue'
             else:
                 message = 'Creating back-up for all users'
                 Write_to_coe.write_to_coe(self.coe_output_file, message)
+                # This command will create a back-up for all the users.
                 backupcommand = 'echo \'action=backup&append%5Fto%5Fpath=nothing&database%5Fdata%5Faware=yes&email%5Fdata%5Faware=yes&local%5Fpath=%2Fhome%2Fadmin%2Fadmin%5Fbackups&owner=admin&type=admin&value=multiple&when=now&where=local&who=all\'>> /usr/local/directadmin/data/task.queue'
+            # run the back-up command as the root user.
             stdin, stdout, stderr = self.client.exec_command('su -c \"' + backupcommand + '\"')
-            stdin.write(rootPass+'\n')
+            # input the root password
+            stdin.write(root_pass+'\n')
             stdin.flush()
             print(stdout.readlines())
+            # this command will force the back-up command to run.
             checkcommand = '/usr/local/directadmin/dataskq d200'
+            # run the force command
             stdin, stdout, stderr = self.client.exec_command('su -c \"' + checkcommand + '\"')
-            stdin.write(rootPass+'\n')
+            stdin.write(root_pass+'\n')
             stdin.flush()
-            print(stdout.readlines())
+            print(stdout.read().decode('ascii'))
         except Exception as e:
             print('Connection failed')
             print(e)
-
+    # this function will connect via ftp and download the created back-up file
     def download_backup(self, username, password, host, download_path, coe_output_file):
         # TODO: calculate hash of downloaded file and write it to a file
         with closing(ftplib.FTP()) as ftp:
@@ -57,10 +66,11 @@ class DA_backup:
                 ftp.connect(host,)
                 ftp.login(username, password)
                 ftp.set_pasv(True)
+                # change the directory to the the back-up folder
                 ftp.cwd('/admin_backups')
                 files = ftp.nlst()
                 download_index = None
-
+                # list all files in the back-up folder
                 while download_index != 0:
                     i = 0
                     for file in files[2:]:
@@ -68,6 +78,7 @@ class DA_backup:
                         print(str(i) + " " + file)
                     print('0 Exit')
                     index_input = False
+                    # will loop until a correct index has been input
                     while index_input is False:
                         download_index = input("What file do you want to download?")
                         try:
@@ -81,37 +92,47 @@ class DA_backup:
 
                     if download_index == 0:
                         continue
+                    # instantiate the filename of the back-up file
                     filename = files[download_index+1].lstrip()
                     print("Downloading File:" + filename)
                     message = 'Downloading File: ' + filename
                     Write_to_coe.write_to_coe(self.coe_output_file, message)
                     self.Log.info("Downloading File: " + filename)
                     localfile = os.path.join(download_path, filename)
-
+                    # download the back-up file
                     ftp.retrbinary("RETR " + filename, open(localfile, 'wb').write, 8*1024)
                     message = 'Calculating hash of file' + filename
-
+                    # calculate the hash value of the file and write it to the COE file.
                     hash = self.main.bereken_hash(localfile)
                     Write_to_coe.write_to_coe(self.coe_output_file, message, hash)
 
                     print("Downloading complete")
-
+                # close the FTP connection
                 ftp.quit()
             except ftplib.error_perm as e:
                 print(e)
                 print("error")
 
     # TODO: download the access logs and the phpadmin log: /var/www/html/phpMyAdmin/log/
-    def download_log(self, username, password, host):
+    def download_log(self, username, password, host, server_log_path):
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
             self.client.connect(hostname=host, port=13370, username=username, password=password)
             rootPass = input('Please enter the root password of the server:')
-            stdin, stdout, stderr = self.client.exec_command('su -c \" cat /var/www/html/phpMyAdmin/log/auth.log-20190107 \"')
+            stdin, stdout, stderr = self.client.exec_command('su -c \" cat /var/www/html/phpMyAdmin/log/auth.log* \"')
             stdin.write(rootPass+'\n')
-            for line in stdout.readlines():
-                print(line)
+            with open(os.path.join(server_log_path, 'auth.log')) as file:
+                for line in stdout.readlines():
+                    print(line)
+                    file.write(line)
+
+            stdin, stdout, stderr = self.client.exec_command('su -c \" cat /var/log/secure* \"')
+            stdin.write(rootPass + '\n')
+            with open(os.path.join(server_log_path, 'auth.log')) as file:
+                for line in stdout.readlines():
+                    print(line)
+                    file.write(line)
 
         except Exception as e:
             print(e)
