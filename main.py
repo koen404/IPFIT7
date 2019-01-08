@@ -21,7 +21,6 @@ class Main:
         self.casenumber = None
         self.casename = None
         self.casedir = None
-        self.coe_output_file = None
         self.coepath = os.path.join(sys.path[0], '.coe')
         self.case_path = os.path.join(sys.path[0], 'cases')
         if not os.path.exists(log_path):
@@ -38,7 +37,8 @@ class Main:
                 "2": self.download_back_up,
                 "3": self.file_extraction,
                 "4": self.mail_analysis,
-                "5": self.quit
+                "5": self.download_logs,
+                "6": self.quit
 
                 }
 
@@ -64,7 +64,8 @@ class Main:
         2. Download_Back-up
         3. File_extraction
         4. Mail_analysis
-        5. Quit
+        5. Download_logs
+        6. Quit
         """)
 
     def bereken_hash(self, file):
@@ -104,26 +105,33 @@ class Main:
 
     def create_back_up(self):
         # username is set statically for testing reasons but needs tp be changed to input.
-        username = 'koen'
-        host = input('please enter the DirectAdmin host: ')
-        sshpassword = input('Please enter the SSH password: ')
-        backupuser = input('Please enter the user of which you want to create the back-up from:')
-        self.DA.back_up(host, username, sshpassword, backupuser)
+        self.sshusername = 'koen'
+        self.host = input('please enter the DirectAdmin host: ')
+        self.sshpassword = input('Please enter the SSH password: ')
+        self.backupuser = input('Please enter the user of which you want to create the back-up from:')
+        self.DA.back_up(self.host, self.sshusername, self.sshpassword,  self.coe_output_file, self.backupuser)
 
     def download_back_up(self):
         username = 'admin'
         ftppassword = input('FTP_password:')
         host = input('please enter host')
-        self.DA.download_backup(username, ftppassword, host, self.download_path)
+        self.DA.download_backup(username, ftppassword, host, self.download_path, self.coe_output_file)
 
     def download_logs(self):
-        print('')
+        try:
+            if self.sshpassword is not None:
+                self.DA.download_log(self.sshusername, self.sshpassword, self.host)
+        except AttributeError as e:
+            self.sshusername = 'koen'
+            self.host = input('please enter the DirectAdmin host: ')
+            self.sshpassword = input('Please enter the SSH password: ')
+            self.DA.download_log(self.sshusername, self.sshpassword, self.host)
 
     def file_extraction(self):
         filename = input("please enter the tar.gz file you want to extract (press * for all):")
         print(self.extract_path)
         print(self.download_path)
-        File_extraction.FileExtraction().extract(filename, self.extract_path, self.download_path)
+        File_extraction.FileExtraction().extract(filename, self.extract_path, self.download_path, self.coe_output_file)
 
     def coe(self):
         self.examiner = input('Please enter your name:')
@@ -140,7 +148,7 @@ class Main:
                 filewriter.writerow(['Examiner', self.examiner])
                 filewriter.writerow(['Case number', self.casenumber])
                 filewriter.writerow(['Case Name', self.casename])
-                filewriter.writerow(['What', 'When'])
+                filewriter.writerow(['When', 'What', 'Hash'])
         else:
             print('Using existing coe file: ' + self.coe_output_file)
 
@@ -155,7 +163,6 @@ class Main:
         print('Database analysis')
 
     def quit(self):
-        os.remove(self.coepath)
         self.Log().info("Exiting script")
         sys.exit(0)
 
