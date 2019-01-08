@@ -28,9 +28,6 @@ class Main:
         if not os.path.exists(self.case_path):
             os.makedirs(self.case_path)
 
-        # if not os.path.exists(self.download_path):
-        #     os.makedirs(self.download_path)
-
         self.log_location = os.path.join(sys.path[0], 'log', 'Main_log_' + str(date.today()) + '.log')
         self.choices_main = {
                 "1": self.create_back_up,
@@ -88,6 +85,9 @@ class Main:
         if not os.path.exists(self.download_path):
             os.makedirs(self.download_path)
         self.extract_path = os.path.join(self.casedir, 'extract')
+        self.server_log_path = os.path.join(self.casedir, 'server_logs')
+        if not os.path.exists(self.server_log_path):
+            os.makedirs(self.server_log_path)
 
         self.Log().info("Starting Main_Script")
 
@@ -104,12 +104,15 @@ class Main:
                 print("{0} is not a valid choice".format(choice))
 
     def create_back_up(self):
-        # username is set statically for testing reasons but needs tp be changed to input.
-        self.sshusername = 'koen'
-        self.host = input('please enter the DirectAdmin host: ')
-        self.sshpassword = input('Please enter the SSH password: ')
-        self.backupuser = input('Please enter the user of which you want to create the back-up from:')
-        self.DA.back_up(self.host, self.sshusername, self.sshpassword,  self.coe_output_file, self.backupuser)
+        try:
+            if self.sshpassword is not None:
+                self.DA.back_up(self.host, self.sshusername, self.sshpassword, self.coe_output_file, self.backupuser)
+        except AttributeError as e:
+            self.sshusername = 'koen'
+            self.host = input('please enter the DirectAdmin host: ')
+            self.sshpassword = input('Please enter the SSH password: ')
+            self.backupuser = input('Please enter the user of which you want to create the back-up from:')
+            self.DA.back_up(self.host, self.sshusername, self.sshpassword,  self.coe_output_file, self.backupuser)
 
     def download_back_up(self):
         username = 'admin'
@@ -120,12 +123,12 @@ class Main:
     def download_logs(self):
         try:
             if self.sshpassword is not None:
-                self.DA.download_log(self.sshusername, self.sshpassword, self.host)
+                self.DA.download_log(self.sshusername, self.sshpassword, self.host, self.server_log_path)
         except AttributeError as e:
             self.sshusername = 'koen'
             self.host = input('please enter the DirectAdmin host: ')
             self.sshpassword = input('Please enter the SSH password: ')
-            self.DA.download_log(self.sshusername, self.sshpassword, self.host)
+            self.DA.download_log(self.sshusername, self.sshpassword, self.host, self.server_log_path)
 
     def file_extraction(self):
         filename = input("please enter the tar.gz file you want to extract (press * for all):")
