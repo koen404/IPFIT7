@@ -8,19 +8,16 @@ from time import gmtime, strftime
 
 class FileExtraction:
     def __init__(self):
-        self.filename = None
 
         self.extract_path = None
-        self.download_path = None
-
         self.Log = main.Main().Log()
-        self.extractPath = None
 
 
-    # TODO: Add more logging to this section
-    def extract(self, filename, extract_path, download_path):
+    # TODO: Add more logging to this section also add data to the coe file.
+    def extract(self, filename, extract_path, download_path, coe_output_file):
         self.download_path = download_path
         self.extract_path = extract_path
+        self.coe_output_file = coe_output_file
 
         if filename == '*':
             self.extractAll()
@@ -36,7 +33,7 @@ class FileExtraction:
                 print('extracting tar file:' + file)
                 temp = os.path.basename(file)
                 dirname = os.path.splitext(os.path.splitext(temp)[0])[0]
-                finalPath = os.path.join(self.extractPath, dirname)
+                finalPath = os.path.join(self.extract_path, dirname)
 
                 if not os.path.exists(finalPath):
                     self.Log.info('Creating directory:' + finalPath)
@@ -76,4 +73,4 @@ class FileExtraction:
                     print(os.path.join(path, name))
                     hash = main.Main().bereken_hash(os.path.join(path, name))
                     filewriter.writerow([str(strftime("%Y-%m-%d %H:%M:%S", gmtime())), os.path.join(path, name), str(hash)])
-            # filewriter.close()
+
