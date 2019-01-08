@@ -113,12 +113,14 @@ class DA_backup:
                 print(e)
                 print("error")
 
-    # TODO: download the access logs and the phpadmin log: /var/www/html/phpMyAdmin/log/
     def download_log(self, username, password, host, server_log_path):
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
             self.client.connect(hostname=host, port=13370, username=username, password=password)
+        except Exception as e:
+            print(e)
+
             rootPass = input('Please enter the root password of the server:')
             stdin, stdout, stderr = self.client.exec_command('su -c \" cat /var/www/html/phpMyAdmin/log/auth.log* \"')
             stdin.write(rootPass+'\n')
@@ -129,11 +131,17 @@ class DA_backup:
 
             stdin, stdout, stderr = self.client.exec_command('su -c \" cat /var/log/secure* \"')
             stdin.write(rootPass + '\n')
-            with open(os.path.join(server_log_path, 'auth.log')) as file:
+            with open(os.path.join(server_log_path, 'secure.log')) as file:
+                for line in stdout.readlines():
+                    print(line)
+                    file.write(line)
+        # /var/log/httpd
+            stdin, stdout, stderr = self.client.exec_command('su -c \" cat /var/log/httpd/access_log* \"')
+            stdin.write(rootPass + '\n')
+            with open(os.path.join(server_log_path, 'http_acces.log')) as file:
                 for line in stdout.readlines():
                     print(line)
                     file.write(line)
 
-        except Exception as e:
-            print(e)
+
 
