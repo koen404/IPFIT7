@@ -4,7 +4,6 @@ import os
 import main
 import csv
 from contextlib import closing
-from time import gmtime, strftime
 import Write_to_coe
 class DA_backup:
     def __init__(self):
@@ -28,7 +27,7 @@ class DA_backup:
             # connect with the SSH host
             self.client.connect(hostname=host, port=13370, username=username, password=password)
             # TODO: move all input to main class
-            # ask for root pass
+            # ask for root pass should be moved to the main class
             root_pass = input('Please enter the root password of the server:')
             if backupuser != '':
                 message = 'Creating back-up for user: ' + backupuser
@@ -118,30 +117,28 @@ class DA_backup:
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
             self.client.connect(hostname=host, port=13370, username=username, password=password)
-        except Exception as e:
-            print(e)
+
 
             rootPass = input('Please enter the root password of the server:')
             stdin, stdout, stderr = self.client.exec_command('su -c \" cat /var/www/html/phpMyAdmin/log/auth.log* \"')
             stdin.write(rootPass+'\n')
-            with open(os.path.join(server_log_path, 'auth.log')) as file:
+            with open(os.path.join(server_log_path, 'auth.log'), 'w') as file:
                 for line in stdout.readlines():
                     print(line)
                     file.write(line)
 
             stdin, stdout, stderr = self.client.exec_command('su -c \" cat /var/log/secure* \"')
             stdin.write(rootPass + '\n')
-            with open(os.path.join(server_log_path, 'secure.log')) as file:
+            with open(os.path.join(server_log_path, 'secure.log'), 'w') as file:
                 for line in stdout.readlines():
                     print(line)
                     file.write(line)
         # /var/log/httpd
             stdin, stdout, stderr = self.client.exec_command('su -c \" cat /var/log/httpd/access_log* \"')
             stdin.write(rootPass + '\n')
-            with open(os.path.join(server_log_path, 'http_acces.log')) as file:
+            with open(os.path.join(server_log_path, 'http_acces.log'),'w') as file:
                 for line in stdout.readlines():
                     print(line)
                     file.write(line)
-
-
-
+        except paramiko.ssh_exception.SSHException as e:
+            print(e)
