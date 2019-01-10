@@ -3,7 +3,7 @@ import os
 import csv
 from collections import Counter
 import uniquify
-# TODO: extract the IP-adressess from the log files. Check what IP's have logged in successfully
+# TODO: move these functions inside a class.
 
 
 def analyse_log(logfile, filename, auth = False):
@@ -21,7 +21,7 @@ def analyse_log(logfile, filename, auth = False):
         output_file = uniquify.uniquify(output_file)
     print(output_file)
 
-
+    # todo: there is an issue with the IP regex, also the Failed IP will write 2 times to the file.
     with open(logfile, 'r') as file:
         if 'secure' in logfile:
             for line in file:
@@ -48,7 +48,8 @@ def analyse_log(logfile, filename, auth = False):
         elif 'access' in logfile:
             for line in file:
                 if 'POST /phpmyadmin/ajax.php' in line:
-                    ip = getIP(line)
+                    ip = getIP(line, pop_index=0)
+                    print(ip)
                     line = line.replace(ip, '')
                     date = re.search('(([0-2][0-9]|(3)[0-1])(\/)(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\/)\d{4}:(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d))', line).group()
                     line = line.replace(date, '')
@@ -80,8 +81,11 @@ def output_log(file,  IP, date='', log_message='', log_message3=''):
         filewriter.writerow([date, IP, log_message, log_message3])
 
 
-def getIP(line):
-    ip = re.findall(r'[0-9]+(?:\.[0-9]+){3}', line).pop()
+def getIP(line, pop_index = None):
+    if pop_index is None :
+        ip = re.findall(r'[0-9]+(?:\.[0-9]+){3}', line).pop()
+    else:
+        ip = re.findall(r'[0-9]+(?:\.[0-9]+){3}', line).pop( pop_index)
     return ip
 
 
