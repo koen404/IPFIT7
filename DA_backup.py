@@ -2,16 +2,16 @@ import paramiko
 import ftplib
 import os
 import main
-import csv
 from contextlib import closing
 import Write_to_coe
+import Log_analysis
+import uniquify
 class DA_backup:
     def __init__(self):
         self.client = None
         self.Log = main.Main().Log()
         self.main = main.Main()
         self.shell = None
-
     # function to create an back-up on the DA server. Will need the username hostname and password
     def back_up(self, host, username, password, coe_output_file, backupuser=None):
         self.coe_output_file = coe_output_file
@@ -55,6 +55,7 @@ class DA_backup:
         except Exception as e:
             print('Connection failed')
             print(e)
+
     # this function will connect via ftp and download the created back-up file
     def download_backup(self, username, password, host, download_path, coe_output_file):
         # TODO: calculate hash of downloaded file and write it to a file
@@ -112,33 +113,41 @@ class DA_backup:
                 print(e)
                 print("error")
 
+    # function to download the log files from the server.
     def download_log(self, username, password, host, server_log_path):
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
             self.client.connect(hostname=host, port=13370, username=username, password=password)
-
-
             rootPass = input('Please enter the root password of the server:')
             stdin, stdout, stderr = self.client.exec_command('su -c \" cat /var/www/html/phpMyAdmin/log/auth.log* \"')
             stdin.write(rootPass+'\n')
-            with open(os.path.join(server_log_path, 'auth.log'), 'w') as file:
-                for line in stdout.readlines():
-                    print(line)
-                    file.write(line)
 
+            auth_log = uniquify.uniquify(os.path.join(server_log_path, 'auth.log'))
+            with open(auth_log, 'w') as file:
+                for line in stdout.readlines():
+                    file.write(line)
+            # use cat to get the log files, because to access them you need root access.
             stdin, stdout, stderr = self.client.exec_command('su -c \" cat /var/log/secure* \"')
             stdin.write(rootPass + '\n')
-            with open(os.path.join(server_log_path, 'secure.log'), 'w') as file:
+            # TODO: make the output filename variable and build in a check to detect if the filename already exist.
+            secure_log = uniquify.uniquify(os.path.join(server_log_path, 'secure.log'))
+
+            with open(secure_log, 'w') as file:
                 for line in stdout.readlines():
-                    print(line)
+                    # Write the output to the log file.
                     file.write(line)
-        # /var/log/httpd
+
             stdin, stdout, stderr = self.client.exec_command('su -c \" cat /var/log/httpd/access_log* \"')
             stdin.write(rootPass + '\n')
-            with open(os.path.join(server_log_path, 'http_acces.log'),'w') as file:
+            http_access_log = uniquify.uniquify(os.path.join(server_log_path, 'httpaccess.log'))
+            with open(http_access_log, 'w') as file:
                 for line in stdout.readlines():
                     print(line)
                     file.write(line)
+            Log_analysis.analyse_log(secure_log, 'SSH_logins')
+            Log_analysis.analyse_log(http_access_log, 'PHP_MyADMin_logins')
+            Log_analysis.analyse_log(auth_log, 'PHP_MyADMin_logins', auth=True)
+        # except all ssh exceptions.
         except paramiko.ssh_exception.SSHException as e:
             print(e)
