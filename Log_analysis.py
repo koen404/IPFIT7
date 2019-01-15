@@ -2,10 +2,10 @@ import re
 import os
 import csv
 from collections import Counter
-import uniquify
+from resources import uniquify
+
+
 # TODO: move these functions inside a class.
-
-
 def analyse_log(logfile, filename, auth = False):
     abs_path = os.path.abspath(os.path.dirname(logfile))
     os.chdir(abs_path)
