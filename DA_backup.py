@@ -3,9 +3,10 @@ import ftplib
 import os
 import main
 from contextlib import closing
-import Write_to_coe
 import Log_analysis
-import uniquify
+from resources import uniquify, Write_to_coe
+
+
 class DA_backup:
     def __init__(self, casedir):
         self.casedir = casedir
@@ -14,6 +15,7 @@ class DA_backup:
         self.main = main.Main()
         self.shell = None
         self.coe_output_file = Write_to_coe.get_coe_output(self.casedir)
+
     # function to create an back-up on the DA server. Will need the username hostname and password
     def back_up(self, host, username, password, backupuser=None):
         # instantiate the paramiko ssh client
