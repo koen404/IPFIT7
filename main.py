@@ -7,6 +7,7 @@ import DA_backup
 import File_extraction
 import csv
 import Mail_analysis
+import Restore_database
 import getpass
 
 
@@ -36,7 +37,8 @@ class Main:
                 "3": self.file_extraction,
                 "4": self.mail_analysis,
                 "5": self.download_logs,
-                "6": self.quit
+                "6": self.database_analysis,
+                "7": self.quit
 
                 }
 
@@ -64,7 +66,8 @@ class Main:
         3. File_extraction
         4. Mail_analysis
         5. Download_logs
-        6. Quit
+        6. Restore_database
+        7. Quit
         """)
     # This function will calculate the hash of a file (can be moved to an separate file/class)
     def bereken_hash(self, file):
@@ -190,7 +193,7 @@ class Main:
 
     # This function will run the database restore and analysis function from the restore_database class
     def database_analysis(self):
-        print('Database analysis')
+        Restore_database.database_analysis(self.extract_path).select_database()
 
     # This function will stop the program from running
     def quit(self):
