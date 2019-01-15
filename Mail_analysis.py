@@ -2,6 +2,7 @@ import mailbox
 import email.utils
 import os
 import main
+from resources import list_dir
 
 # todo : make maildir filter out all mails with attachements.
 class Mail_analysis:
@@ -13,12 +14,12 @@ class Mail_analysis:
     # let the user select the correct maildir
     def load_maildir(self):
         if os.listdir(self.mailbak_path):
-            nextfolder = self.listdir(self.mailbak_path, 'Please enter the index of the back-up of which you want to analyse the maildir')
+            nextfolder = list_dir.listdir(self.mailbak_path, 'Please enter the index of the back-up of which you want to analyse the maildir')
             nextfolder = os.path.join(nextfolder, 'imap')
             print(nextfolder)
-            thirdfolder = self.listdir(nextfolder, 'Please enter the index of the domain you want to analyse the mail from')
+            thirdfolder = list_dir.listdir(nextfolder, 'Please enter the index of the domain you want to analyse the mail from')
 
-            self.fourthfolder = self.listdir(thirdfolder, 'Please enter the index of the maildir you want to analyse')
+            self.maildir = list_dir.listdir(thirdfolder, 'Please enter the index of the maildir you want to analyse')
             self.log.info('Selecting maildir folder' + self.maildir)
             print(self.maildir)
             self.showmail(self.maildir)
@@ -52,31 +53,3 @@ class Mail_analysis:
 
     # list the content of a selected dir.
     # This function will be used to loop through the different back-up folders to finally select the maildir.
-    def listdir(self, path, input_question):
-        dir_list = os.listdir(path)
-        i = 0
-        for file in dir_list:
-
-            if os.path.isdir(os.path.join(path, file)):
-                i += 1
-                print(str(i) + " " + file)
-
-        index_input = False
-        while index_input is False:
-            folder_index = input(input_question)
-            try:
-                val = int(folder_index)
-                index_input = True
-                if val > len(dir_list):
-
-                    index_input = False
-                    raise ValueError
-                nextfolder = os.path.join(path, dir_list[val - 1])
-                index_input = True
-            except ValueError:
-                print('This is not a correct index please try again')
-                self.log.warning('Incorrect index input for mail dir folder by user')
-                index_input = False
-                return None
-
-        return nextfolder
