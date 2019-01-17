@@ -3,34 +3,37 @@ import tarfile
 import os
 import sys
 import csv
+from resources import Write_to_coe
 from time import gmtime, strftime
 
 
 class FileExtraction:
-    def __init__(self):
-
+    def __init__(self, casedir):
+        self.coe_output_file = Write_to_coe.get_coe_output(casedir)
         self.extract_path = None
         self.Log = main.Main().Log()
 
 
     # TODO: Add more logging to this section also add data to the coe file.
-    def extract(self, filename, extract_path, download_path, coe_output_file):
+    def extract(self, filename, extract_path, download_path, ):
         self.download_path = download_path
         self.extract_path = extract_path
-        self.coe_output_file = coe_output_file
 
         if filename == '*':
             self.extractAll()
+            self.Log.info('Extracting all tar.gz files')
         else:
-            print(os.path.join(self.download_path, filename))
             self.extractFile(os.path.join(self.download_path, filename))
 
     def extractFile(self, file):
         if os.path.exists(file) :
             if file.endswith('tar.gz'):
                 self.Log.info("Opening tar.gz file:" + file)
-                tar = tarfile.open(file, 'r:gz')
+                Write_to_coe.write_to_coe(self.coe_output_file, "Opening tar.gz file:" + file)
+                tar = tarfile.open(file, 'r')
                 print('extracting tar file:' + file)
+                Write_to_coe.write_to_coe(self.coe_output_file, 'extracting tar file:' + file)
+
                 temp = os.path.basename(file)
                 dirname = os.path.splitext(os.path.splitext(temp)[0])[0]
                 finalPath = os.path.join(self.extract_path, dirname)
@@ -44,6 +47,7 @@ class FileExtraction:
                     print('Extraction complete')
                     tar.close()
                     print('Calculating hashes of extracted files')
+                    Write_to_coe.write_to_coe(self.coe_output_file, 'Writing hashes of file to: ' + dirname + 'Hashes.csv')
                     self.calculateHash(finalPath, dirname)
                 elif os.path.exists(finalPath):
                     print('Warning the extraction folder already exists: ' + finalPath )
