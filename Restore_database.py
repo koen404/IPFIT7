@@ -32,7 +32,7 @@ class database_analysis:
             self.Log.info('Creating directory : ' + outpath)
 
         output_database = os.path.join(outpath, output_database.replace('.sql', '.db'))
-        subprocess.call("./mysql2sqlite", database_name, '|', output_database)
+        subprocess.call("./resources/mysql2sqlite", database_name, '|', output_database)
         # passwd= input('please enter the password of the IPFIT7 user')
         # try:
         #     self.con = pymysql.connect(host, user, passwd)
