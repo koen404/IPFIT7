@@ -3,14 +3,15 @@ import os
 import main
 from resources import list_dir
 import csv
-# todo : output of all attachment mails.
+
+
 class Mail_analysis:
 
     def __init__(self, casedir_path):
         self.casedir_path = casedir_path
         self.mailbak_path = os.path.join(casedir_path)
         self.log = main.Main().Log()
-        self.output_path =  os.path.join(self.casedir_path, '..\output\mails')
+        self.output_path = os.path.join(self.casedir_path, '..\output\mails')
 
     # let the user select the correct maildir
     def load_maildir(self):
@@ -19,32 +20,35 @@ class Mail_analysis:
             nextfolder = os.path.join(nextfolder, 'imap')
             print(nextfolder)
             thirdfolder = list_dir.listdir(nextfolder, 'Please enter the index of the domain you want to analyse the mail from')
-
+            # select the maildir
             self.maildir = list_dir.listdir(thirdfolder, 'Please enter the index of the maildir you want to analyse')
             self.output_name = os.path.basename(self.maildir)
             self.log.info('Selecting maildir folder' + self.maildir)
             print(self.maildir)
             self.showmail(self.maildir)
         else:
+            # Give warning when the extraction folder is empty
             print('The extraction folder is empty, please download and extract the back-up first')
             self.log.warning('The extraction folder doesn\'t contain any files')
 
-
-    # TODO test this function with a know good maildir,because it looks like this function doesn't work as it suposed to
     # Write the mail to an csv file. And still needs some kind of analysis.
     def showmail(self, maildir):
+        self.attachment_output = os.path.join(self.output_path, 'attachments')
+        # create the attachment output folder.
+        if not os.path.exists(self.attachment_output):
+            os.makedirs(self.attachment_output)
+        # open the sent maildir
         mbox = mailbox.Maildir(os.path.join(maildir, 'Maildir', '.Sent'))
         mbox.lock()
-        if not os.path.exists(self.output_path):
-            os.makedirs(self.output_path)
 
         index_input = False
         val = 0
         while index_input is False:
+            # select if all sent mails must be written to the csv file or only the mails with attachments
             print('1. Filter out all sent mails')
             print('2. Filter only sent mails with attachments.')
             print('')
-            attachment = input('Extract all sent mails or only with attachement?')
+            attachment = input('Extract all sent mails or only with attachment?')
             try:
                 val = int(attachment)
                 index_input = True
@@ -57,6 +61,7 @@ class Mail_analysis:
 
                 index_input = False
                 return None
+        i = 1
         for message in mbox:
             if val == 1:
                 self.write_mail(message)
@@ -77,10 +82,12 @@ class Mail_analysis:
                         continue
                     filename = part.get_filename()
                     print(filename)
+                    fb = open(os.path.join(self.attachment_output, i+filename), 'w')
+                    i +=1
+                    fb.write(part.get_payload(decode=True))
+                    fb.close()
 
-
-    # list the content of a selected dir.
-    # This function will be used to loop through the different back-up folders to finally select the maildir.
+    # Write the mail to a CSV file
     def write_mail(self, message):
         with open(os.path.join(self.output_path, self.output_name+'.csv'), 'a') as csv_file:
             writer = csv.writer(csv_file)
@@ -94,18 +101,12 @@ class Mail_analysis:
             temp = ''
             for char in str(content):
                 temp = temp +char
-                print (temp)
 
                 if "\\n" in temp:
-                    print('tesr')
                     temp = temp.replace('\\n', '')
                     print(temp)
                     writer.writerow([temp])
                     temp = ''
                 elif "\\" in temp:
-                    print ('slash')
                     continue
-
-            # for line in str(content):
-            #     writer.writerow([content])
             writer.writerow(['-------------------------------------'])
