@@ -135,7 +135,7 @@ class Main:
                 ftppassword = input('FTP_password: ')
         except AttributeError:
 
-            host = input('please enter host: ')
+            self.host = input('please enter host: ')
             username = 'admin'
             ftppassword = input('FTP_password: ')
 
@@ -159,7 +159,7 @@ class Main:
         filename = input("please enter the tar.gz file you want to extract (press * for all):")
         print(self.extract_path)
         print(self.download_path)
-        File_extraction.FileExtraction().extract(filename, self.extract_path, self.download_path, self.coe_output_file)
+        File_extraction.FileExtraction(self.casedir).extract(filename, self.extract_path, self.download_path)
 
     # This function will create the COE file. If it already exists it will use the existing file.
     def coe(self):
