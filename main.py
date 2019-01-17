@@ -66,7 +66,7 @@ class Main:
         3. File_extraction
         4. Mail_analysis
         5. Download_logs
-        6. Restore_database
+        6. Database_analysis
         7. Quit
         """)
     # This function will calculate the hash of a file (can be moved to an separate file/class)
@@ -79,23 +79,27 @@ class Main:
                     file_buffer = file.read(self.BUFFERSIZE)
         else:
             self.Log().info(file + ": File does not exist or is not accessible, will not calculate hash")
-
+        # return the sha256 hash of the file
         return str(self.sha256hash.hexdigest())
     # This function will be executed once the main script is run.
     def run(self):
-
+        # ask for the COE info on startup
         self.coe()
-
+        # Set the download path
         self.download_path = os.path.join(self.casedir, 'download')
+        # if the path doesn't exist create it
         if not os.path.exists(self.download_path):
             os.makedirs(self.download_path)
+        # set the extract path
         self.extract_path = os.path.join(self.casedir, 'extract')
+        # set the log path
         self.server_log_path = os.path.join(self.casedir, 'server_logs')
         if not os.path.exists(self.server_log_path):
             os.makedirs(self.server_log_path)
 
         self.Log().info("Starting Main_Script")
         self.DA = DA_backup.DA_backup(self.casedir)
+        # keep looping through the menu
         while True:
             self.display_menu()
             choice = input("Enter an option: ")
@@ -105,40 +109,53 @@ class Main:
             if action:
                 action()
             else:
+                # give feedback when a wrong input has been given
                 self.Log().info("Invalid input, restarting script")
                 print("{0} is not a valid choice".format(choice))
 
     # This function will call the back-up function from the DA_back-up class.
     def create_back_up(self):
+        # check if the host, userneme and password already have been set if not set them
         try:
             if self.sshpassword is not None:
                 self.DA.back_up(self.host, self.sshusername, self.sshpassword, self.backupuser)
-        except AttributeError as e:
+        except AttributeError:
             self.sshusername = 'koen'
             self.host = input('please enter the DirectAdmin host: ')
             self.sshpassword = input('Please enter the SSH password: ')
-            self.backupuser = input('Please enter the user of which you want to create the back-up from:')
+            self.backupuser = input('Please enter the user of which the back-up needs to be created, press enter for full back-up:')
             self.DA.back_up(self.host, self.sshusername, self.sshpassword, self.backupuser)
 
     # This function will call the download function from the DA_back-up class
     def download_back_up(self):
-        username = 'admin'
-        ftppassword = input('FTP_password:')
-        host = input('please enter host')
-        self.DA.download_backup(username, ftppassword, host, self.download_path)
+        try:
+            if self.host is not None:
+
+                username = 'admin'
+                ftppassword = input('FTP_password: ')
+        except AttributeError:
+
+            host = input('please enter host: ')
+            username = 'admin'
+            ftppassword = input('FTP_password: ')
+
+        self.DA.download_backup(username, ftppassword, self.host, self.download_path)
 
     # This function will call the download log function from the DA_Back-up class
     def download_logs(self):
+        # check if the password, host username or logpath have been set if not set them
         try:
             if self.sshpassword is not None:
                 self.DA.download_log(self.sshusername, self.sshpassword, self.host, self.server_log_path)
         except AttributeError as e:
-            self.sshusername = 'koen'
+            self.sshusername = 'koen'#input('Please enter the username')
             self.host = input('please enter the DirectAdmin host: ')
             self.sshpassword = input('Please enter the SSH password: ')
             self.DA.download_log(self.sshusername, self.sshpassword, self.host, self.server_log_path)
-    # This function
+
+    # this function will start the extraction class
     def file_extraction(self):
+        # should change this so it's less prone to user error
         filename = input("please enter the tar.gz file you want to extract (press * for all):")
         print(self.extract_path)
         print(self.download_path)
@@ -146,9 +163,9 @@ class Main:
 
     # This function will create the COE file. If it already exists it will use the existing file.
     def coe(self):
-        self.examiner = input('Please enter your name:')
-        self.casenumber = input('Please enter the casenumber:')
-        self.casename = input('please enter a case name (press enter if none):')
+        self.examiner = input('Please enter your name: ')
+        self.casenumber = input('Please enter the casenumber: ')
+        self.casename = input('please enter a case name (press enter if none): ')
 
         self.casedir = os.path.join(self.case_path, self.casenumber + '_' + self.casename)
         if not os.path.exists(self.casedir):
@@ -171,11 +188,11 @@ class Main:
                 readCSV = csv.reader(file, delimiter=',',
                                         quotechar='|', quoting=csv.QUOTE_MINIMAL)
                 for row in readCSV:
-                    if i ==0:
+                    if i == 0:
                         temp_name = row[1]
                         print(temp_name)
 
-                    i+=1
+                    i += 1
             temp_name = str(temp_name).upper()
             if self.examiner.upper() == temp_name:
                 self.Log().info('COE file already exist')
