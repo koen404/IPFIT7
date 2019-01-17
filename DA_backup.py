@@ -15,6 +15,7 @@ class DA_backup:
         self.main = main.Main()
         self.shell = None
         self.coe_output_file = Write_to_coe.get_coe_output(self.casedir)
+        print(self.coe_output_file)
 
     # function to create an back-up on the DA server. Will need the username hostname and password
     def back_up(self, host, username, password, backupuser=None):
@@ -93,8 +94,6 @@ class DA_backup:
                         download_index = input("What file do you want to download?")
                         try:
                             val = int(download_index)
-
-
                             download_index = val
                             if val > len(files):
                                 raise ValueError
@@ -111,6 +110,8 @@ class DA_backup:
                     Write_to_coe.write_to_coe(self.coe_output_file, message)
                     self.Log.info("Downloading File: " + filename)
                     localfile = os.path.join(download_path, filename)
+                    if os.path.exists(localfile):
+                        localfile= uniquify.uniquify(localfile)
                     # download the back-up file
                     ftp.retrbinary("RETR " + filename, open(localfile, 'wb').write, 8*1024)
                     message = 'Calculating hash of file: ' + filename
@@ -134,12 +135,14 @@ class DA_backup:
         try:
             self.client.connect(hostname=host, port=13370, username=username, password=password)
             self.Log.info('Connecting via SSH to: ' + host)
+            Write_to_coe.write_to_coe(self.coe_output_file, 'Connecting via SSH to: ' + host)
 
             rootPass = input('Please enter the root password of the server:')
             stdin, stdout, stderr = self.client.exec_command('su -c \" cat /var/www/html/phpMyAdmin/log/auth.log* \"')
             stdin.write(rootPass+'\n')
             auth_log = uniquify.uniquify(os.path.join(server_log_path, 'auth.log'))
-            self.Log.info('Writing phpMyadmin auth.log to file: '+ auth_log)
+            self.Log.info('Writing phpMyadmin auth.log to file: ' + auth_log)
+            Write_to_coe.write_to_coe(self.coe_output_file, 'Writing phpMyadmin auth.log to file: ' + auth_log)
 
             with open(auth_log, 'w') as file:
                 for line in stdout.readlines():
@@ -149,6 +152,8 @@ class DA_backup:
             stdin.write(rootPass + '\n')
             # TODO: make the output filename variable and build in a check to detect if the filename already exist.
             secure_log = uniquify.uniquify(os.path.join(server_log_path, 'secure.log'))
+            self.Log.info('Writing phpMyadmin secure.log to file: ' + secure_log)
+            Write_to_coe.write_to_coe(self.coe_output_file, 'Writing phpMyadmin secure.log to file: ' + secure_log)
 
             with open(secure_log, 'w') as file:
                 for line in stdout.readlines():
@@ -158,13 +163,16 @@ class DA_backup:
             stdin, stdout, stderr = self.client.exec_command('su -c \" cat /var/log/httpd/access_log* \"')
             stdin.write(rootPass + '\n')
             http_access_log = uniquify.uniquify(os.path.join(server_log_path, 'httpaccess.log'))
+            self.Log.info('Writing phpMyadmin http_access.log to file: ' + http_access_log)
+            Write_to_coe.write_to_coe(self.coe_output_file, 'Writing phpMyadmin http_access.log to file: ' + http_access_log)
+
             with open(http_access_log, 'w') as file:
                 for line in stdout.readlines():
                     print(line)
                     file.write(line)
-            Log_analysis.analyse_log(secure_log, 'SSH_logins')
-            Log_analysis.analyse_log(http_access_log, 'PHP_MyADMin_logins')
-            Log_analysis.analyse_log(auth_log, 'PHP_MyADMin_logins', auth=True)
+            Log_analysis.Log().analyse_log(secure_log, 'SSH_logins')
+            Log_analysis.Log().analyse_log(http_access_log, 'PHP_MyADMin_logins')
+            Log_analysis.Log().analyse_log(auth_log, 'PHP_MyADMin_logins', auth=True)
         # except all ssh exceptions.
         except paramiko.ssh_exception.SSHException as e:
             print(e)
