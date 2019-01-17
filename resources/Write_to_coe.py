@@ -3,6 +3,7 @@ import csv
 import os
 
 def write_to_coe(output_file, message, hash=''):
+    print(output_file)
     with open(output_file, 'a') as file:
         filewriter = csv.writer(file, delimiter=',',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
