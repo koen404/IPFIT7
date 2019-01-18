@@ -33,6 +33,7 @@ class database_analysis:
 
         output_database = os.path.join(outpath, output_database.replace('.sql', '.db'))
         subprocess.call("./resources/mysql2sqlite", database_name, '|', output_database)
+        self.run_sqliteBrowser(output_database)
         # passwd= input('please enter the password of the IPFIT7 user')
         # try:
         #     self.con = pymysql.connect(host, user, passwd)
@@ -51,5 +52,6 @@ class database_analysis:
         # mycursor.execute("CREATE DATABASE IF NOT EXISTS " + output_database)
         # subprocess.call(["mysql", "-u", user, "-p",passwd, output_database , '<', database_name])
 
-    def run_sqliteBrowser(self):
-        os.system('')
+    def run_sqliteBrowser(self, database):
+        subprocess.call(['sqlitebrowser', '-R', database])
+
