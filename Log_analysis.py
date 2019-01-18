@@ -14,7 +14,7 @@ class Log:
         # set the output path
         abs_path = os.path.abspath(os.path.dirname(logfile))
         os.chdir(abs_path)
-        output_path = os.path.abspath('../output')
+        output_path = os.path.abspath('../output/Logs')
 
         if not os.path.exists(output_path):
             os.makedirs(output_path)
