@@ -62,18 +62,19 @@ class Mail_analysis:
                 index_input = False
                 return None
         i = 1
+        counter = 1
         for message in mbox:
             if val == 1:
-                self.write_mail(message)
-
-                    # message_string = str(message)
-                    # print(message_string)
-
-                    # writer.writerow([key,value])
-                    # for line in message_string:
+                if message is not None:
+                    self.write_mail(message, counter)
+                    counter += 1
+                else:
+                    print("No e-mails found")
+                    self.log.info("No e-mail messages found")
 
             if message.get_content_maintype() == 'multipart' and val == 2:
-                print(message)
+                self.write_mail(message, counter)
+                counter += 1
 
                 for part in message.walk():
                     if part.get_content_maintype() == 'multipart':
@@ -86,12 +87,16 @@ class Mail_analysis:
                     i +=1
                     fb.write(part.get_payload(decode=True))
                     fb.close()
+            else:
+                print("No e-mails found")
+                self.log.info("No e-mail message found")
 
     # Write the mail to a CSV file
-    def write_mail(self, message):
+    def write_mail(self, message, message_nr):
         with open(os.path.join(self.output_path, self.output_name+'.csv'), 'a') as csv_file:
             writer = csv.writer(csv_file)
             writer.writerow(['-------------------------------------'])
+            writer.writerow(['Message Nr', message_nr])
             for key, value in message.items():
                 writer.writerow([key, value])
             if message.is_multipart():
