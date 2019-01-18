@@ -13,8 +13,6 @@ class FileExtraction:
         self.extract_path = None
         self.Log = main.Main().Log()
 
-
-    # TODO: Add more logging to this section also add data to the coe file.
     def extract(self, filename, extract_path, download_path, ):
         self.download_path = download_path
         self.extract_path = extract_path
@@ -26,7 +24,7 @@ class FileExtraction:
             self.extractFile(os.path.join(self.download_path, filename))
 
     def extractFile(self, file):
-        if os.path.exists(file) :
+        if os.path.exists(file):
             if file.endswith('tar.gz'):
                 self.Log.info("Opening tar.gz file:" + file)
                 Write_to_coe.write_to_coe(self.coe_output_file, "Opening tar.gz file:" + file)
@@ -50,7 +48,7 @@ class FileExtraction:
                     Write_to_coe.write_to_coe(self.coe_output_file, 'Writing hashes of file to: ' + dirname + 'Hashes.csv')
                     self.calculateHash(finalPath, dirname)
                 elif os.path.exists(finalPath):
-                    print('Warning the extraction folder already exists: ' + finalPath )
+                    print('Warning the extraction folder already exists: ' + finalPath)
                     print('Rename or move the folder and restart the script to extract the files')
                     self.Log.warning('Folder:' + finalPath + 'exists')
                     self.Log.warning('Stopping extraction script.')
@@ -77,4 +75,3 @@ class FileExtraction:
                     print(os.path.join(path, name))
                     hash = main.Main().bereken_hash(os.path.join(path, name))
                     filewriter.writerow([str(strftime("%Y-%m-%d %H:%M:%S", gmtime())), os.path.join(path, name), str(hash)])
-
