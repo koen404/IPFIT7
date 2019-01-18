@@ -7,7 +7,7 @@ import DA_backup
 import File_extraction
 import csv
 import Mail_analysis
-import Restore_database
+import Convert_database
 import getpass
 
 
@@ -210,7 +210,7 @@ class Main:
 
     # This function will run the database restore and analysis function from the restore_database class
     def database_analysis(self):
-        Restore_database.database_analysis(self.extract_path).select_database()
+        Convert_database.database_analysis(self.extract_path).select_database()
 
     # This function will stop the program from running
     def quit(self):
