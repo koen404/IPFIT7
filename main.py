@@ -9,6 +9,7 @@ import csv
 import Mail_analysis
 import Convert_database
 import getpass
+import Log
 
 
 class Main:
@@ -44,18 +45,8 @@ class Main:
 
     # move the log function to a separate file/class
     def Log(self):
+        return Log.Log(self.log_location)
 
-        logger = logging.getLogger(__name__)
-
-        # check if there already is a loggin handler, if not create one
-        if not len(logger.handlers):
-            logger.setLevel(logging.INFO)
-            handler = logging.FileHandler(self.log_location)
-            handler.setLevel(logging.INFO)
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            handler.setFormatter(formatter)
-            logger.addHandler(handler)
-        return logger
     # this function will display the tekst based userinterface
     def display_menu(self):
         os.system('cls' if os.name == 'nt' else 'clear')
