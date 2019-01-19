@@ -3,6 +3,8 @@ import os
 import main
 from resources import list_dir
 import csv
+import tkinter
+from tkinter.filedialog import askdirectory
 
 class Mail_analysis:
 
@@ -14,23 +16,32 @@ class Mail_analysis:
 
     # let the user select the correct maildir
     def load_maildir(self):
+        root = tkinter.Tk()
+        root.withdraw()
+        root.overrideredirect(True)
+        root.geometry('0x0+0+0')
+        root.deiconify()
+
+        root.lift()
+        root.attributes("-topmost", True)
+        root.focus_force()
+
         if os.listdir(self.mailbak_path):
-            nextfolder = list_dir.listdir(self.mailbak_path, 'Please enter the index of the back-up folder:')
-            if nextfolder is None:
-               return None
-            nextfolder = os.path.join(nextfolder, 'imap')
-            print(nextfolder)
-            thirdfolder = list_dir.listdir(nextfolder, 'Please enter the index of the domain you want to analyse the mail from:')
-            if thirdfolder is None:
-               return None
-            # select the maildir
-            self.maildir = list_dir.listdir(thirdfolder, 'Please enter the index of the mail user you want to analyse:')
-            if self.maildir is None:
-                return None
-            self.output_name = os.path.basename(self.maildir)
-            self.log.info('Selecting maildir folder' + self.maildir)
+            self.maildir = askdirectory(initialdir=self.mailbak_path, parent=root)
             print(self.maildir)
-            self.show_mail(self.maildir)
+            if not self.maildir:
+                print('User cancelled folder selection returning to main')
+                self.log.info('User cancelled folder selection returning to main')
+            elif 'Maildir' in os.listdir(self.maildir):
+                self.output_name=os.path.basename(self.maildir)
+                self.log.info('Selecting maildir folder' + self.maildir)
+                self.show_mail(self.maildir)
+            elif 'Maildir' not in os.listdir(self.maildir):
+                print('That\'s not a Maildir.')
+                self.log.warning('None Maildir folder selected')
+
+            root.destroy()
+
         else:
             # Give warning when the extraction folder is empty
             print('The extraction folder is empty, please download and extract the back-up first')
