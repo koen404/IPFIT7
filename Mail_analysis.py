@@ -15,12 +15,18 @@ class Mail_analysis:
     # let the user select the correct maildir
     def load_maildir(self):
         if os.listdir(self.mailbak_path):
-            nextfolder = list_dir.listdir(self.mailbak_path, 'Please enter the index of the back-up of which you want to analyse the maildir')
+            nextfolder = list_dir.listdir(self.mailbak_path, 'Please enter the index of the back-up folder:')
+            if nextfolder is None:
+               return None
             nextfolder = os.path.join(nextfolder, 'imap')
             print(nextfolder)
-            thirdfolder = list_dir.listdir(nextfolder, 'Please enter the index of the domain you want to analyse the mail from')
+            thirdfolder = list_dir.listdir(nextfolder, 'Please enter the index of the domain you want to analyse the mail from:')
+            if thirdfolder is None:
+               return None
             # select the maildir
-            self.maildir = list_dir.listdir(thirdfolder, 'Please enter the index of the maildir you want to analyse')
+            self.maildir = list_dir.listdir(thirdfolder, 'Please enter the index of the mail user you want to analyse:')
+            if self.maildir is None:
+                return None
             self.output_name = os.path.basename(self.maildir)
             self.log.info('Selecting maildir folder' + self.maildir)
             print(self.maildir)
@@ -36,7 +42,6 @@ class Mail_analysis:
         # open the sent maildir
 
 
-        mbox = mailbox.Maildir(os.path.join(maildir, 'Maildir', '.Sent'))
 
         index_input = False
         val = self.get_input('1. Filter out sent mails','2. Filter out received mails','Filter out sent or received?')
@@ -51,29 +56,52 @@ class Mail_analysis:
 
     # Write the mail to a CSV file
     def write_mail(self, message, message_nr, output_name):
-        self.output_name = self.output_name + output_name
-        with open(os.path.join(self.output_path, self.output_name+'.csv'), 'a') as csv_file:
+        content = ''
+        temp = self.output_name + output_name
+        with open(os.path.join(self.output_path, temp+'.csv'), 'a') as csv_file:
             writer = csv.writer(csv_file)
             writer.writerow(['-------------------------------------'])
             writer.writerow(['Message Nr', message_nr])
             for key, value in message.items():
                 writer.writerow([key, value])
             if message.is_multipart():
-                content = ''.join(part.get_payload(decode=True) for part in message.get_payload())
+                content = message.get_payload()[0]
+                temp2 = str(content)
+                for char in temp2:
+                    temp = temp + char
+
+                    if "\n" in temp:
+
+                        print(temp)
+                        writer.writerow([temp])
+                        temp = ''
+
+                writer.writerow(['-------------------------------------'])
+
+                # print(content)
+                print()
+                # for part in message.get_payload():
+                #     print(part)
+                # ''.join(part.get_payload(decode=True) for part in
+                # content = message.get_payload()[0]
+                # print(content)
+                # # print(content)
+                # for char in content:
+                #     print(str(char))
             else:
                 content = message.get_payload(decode=True)
-            temp = ''
-            for char in str(content):
-                temp = temp +char
+                temp = ''
+                for char in str(content):
+                    temp = temp +char
 
-                if "\\n" in temp:
-                    temp = temp.replace('\\n', '')
-                    print(temp)
-                    writer.writerow([temp])
-                    temp = ''
-                elif "\\" in temp:
-                    continue
-            writer.writerow(['-------------------------------------'])
+                    if "\\n" in temp:
+                        temp = temp.replace('\\n', '')
+                        # print(temp)
+                        writer.writerow([temp])
+                        temp = ''
+                    elif "\\" in temp:
+                        continue
+                writer.writerow(['-------------------------------------'])
 
     def analyse_mails(self, maildir, sent=False):
         if sent==True:
@@ -104,7 +132,7 @@ class Mail_analysis:
                     self.log.info("No e-mail messages found")
 
             if message.get_content_maintype() == 'multipart' and val == 2:
-                output_name+='_at'
+                output_name = output_name+'_at'
                 self.write_mail(message, counter, output_name)
                 counter += 1
 
@@ -115,13 +143,10 @@ class Mail_analysis:
                         continue
                     filename = part.get_filename()
                     print(filename)
-                    fb = open(os.path.join(self.attachment_output, i + filename), 'w')
+                    fb = open(os.path.join(self.attachment_output, str(i) + filename), 'wb')
                     i += 1
                     fb.write(part.get_payload(decode=True))
                     fb.close()
-            else:
-                print("No e-mails found")
-                self.log.info("No e-mail message found")
 
     def get_input(self, question, question2, input_question):
         index_input = False
