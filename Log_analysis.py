@@ -72,7 +72,6 @@ class Log:
 
 
     def output_log(self, file,  IP, date='', log_message='', log_message3=''):
-        print(file)
         if not os.path.exists(file):
             output = open(file, 'w')
             filewriter = csv.writer(output, delimiter=',',
@@ -85,11 +84,11 @@ class Log:
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
             filewriter.writerow([date, IP, log_message, log_message3])
 
-    def getIP(line, pop_index=None):
+    def getIP(self, line, pop_index=None):
         if pop_index is None :
             ip = re.findall(r'[0-9]+(?:\.[0-9]+){3}', line).pop()
         else:
-            ip = re.findall(r'[0-9]+(?:\.[0-9]+){3}', line).pop( pop_index)
+            ip = re.findall(r'[0-9]+(?:\.[0-9]+){3}', line).pop(pop_index)
         return ip
 
     def getdate(self, line):
