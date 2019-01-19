@@ -1,15 +1,13 @@
 import os
 import sys
 from datetime import date
-import logging
 import hashlib as hash
 import DA_backup
 import File_extraction
 import csv
 import Mail_analysis
 import Convert_database
-import getpass
-import Log
+from resources import Log
 
 
 class Main:
@@ -56,7 +54,7 @@ class Main:
         2. Download_Back-up
         3. File_extraction
         4. Mail_analysis
-        5. Download_logs
+        5. Log_analysis
         6. Database_analysis
         7. Quit
         """)
@@ -81,6 +79,7 @@ class Main:
         # if the path doesn't exist create it
         if not os.path.exists(self.download_path):
             os.makedirs(self.download_path)
+        print(os.path.abspath(os.path.join(self.casedir, '../', '../')))
         # set the extract path
         self.extract_path = os.path.join(self.casedir, 'extract')
         # set the log path
@@ -147,10 +146,9 @@ class Main:
     # this function will start the extraction class
     def file_extraction(self):
         # should change this so it's less prone to user error
-        filename = input("please enter the tar.gz file you want to extract (press * for all):")
         print(self.extract_path)
         print(self.download_path)
-        File_extraction.FileExtraction(self.casedir).extract(filename, self.extract_path, self.download_path)
+        File_extraction.FileExtraction(self.casedir).extract(self.extract_path, self.download_path)
 
     # This function will create the COE file. If it already exists it will use the existing file.
     def coe(self):
@@ -171,7 +169,7 @@ class Main:
                 filewriter.writerow(['Examiner:', self.examiner])
                 filewriter.writerow(['Case number:', self.casenumber])
                 filewriter.writerow(['Case Name:', self.casename])
-                filewriter.writerow()
+                filewriter.writerow([])
                 filewriter.writerow(['When', 'What', 'Hash'])
         else:
             i = 0
@@ -191,7 +189,7 @@ class Main:
                 with open(self.coe_output_file, 'a') as file:
                     filewriter = csv.writer(file, delimiter=',',
                                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                    filewriter.writerow()
+                    # filewriter.writerow()
                     filewriter.writerow(['New Examiner', self.examiner])
 
     # This function will run the mail analysis class
@@ -201,7 +199,7 @@ class Main:
 
     # This function will run the database restore and analysis function from the restore_database class
     def database_analysis(self):
-        Convert_database.database_analysis(self.extract_path).select_database()
+        Convert_database.database_analysis(self.extract_path, self.casedir).select_database()
 
     # This function will stop the program from running
     def quit(self):
