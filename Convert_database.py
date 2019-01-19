@@ -2,6 +2,8 @@ import os
 import main
 from resources import list_dir
 import subprocess
+import tkinter
+from tkinter.filedialog import askopenfilename
 
 
 class database_analysis:
@@ -13,15 +15,26 @@ class database_analysis:
 
     # function to let the user select the database that needs to be converted and loaded in the SQLite browser
     def select_database(self):
+        root = tkinter.Tk()
+        root.withdraw()
+        root.overrideredirect(True)
+        root.geometry('0x0+0+0')
+        root.deiconify()
 
-        input_question = 'Select the backup of which you want to restore the database'
+        root.lift()
+        root.attributes("-topmost", True)
+        root.focus_force()
 
-        first = list_dir.listdir(self.extract_path, input_question, files=True)
 
-        while not first.endswith('.sql'):
-            first = list_dir.listdir(first, input_question, files=True)
+        first = askopenfilename(initialdir=self.extract_path, filetypes=[('Sql files', '*.sql')], parent = root)
+        print(first)
+        if first is None:
+            print('Blaat')
         if first.endswith('.sql'):
             self.convert_database(first)
+        else:
+            print('returning to home')
+        root.destroy()
 
     # this function will convert the specified database dump to SQLite format
     def convert_database(self, database_name):
@@ -38,7 +51,7 @@ class database_analysis:
             self.Log.info('Creating directory : ' + outpath)
 
         output_database = os.path.join(outpath, output_database.replace('.sql', '.db'))
-        subprocess.call("./resources/mysql2sqlite", database_name, '|', output_database)
+        subprocess.check_call(["./resources/mysql2sqlite", database_name, '|', output_database], shell=True)
         self.run_sqliteBrowser(output_database)
         # passwd= input('please enter the password of the IPFIT7 user')
         # try:
