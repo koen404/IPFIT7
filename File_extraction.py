@@ -1,10 +1,12 @@
 import main
 import tarfile
 import os
-import sys
+from datetime import datetime
 import csv
 from resources import Write_to_coe
 from time import gmtime, strftime
+import tkinter
+from tkinter.filedialog import askopenfilenames
 
 
 class FileExtraction:
@@ -14,15 +16,26 @@ class FileExtraction:
         self.Log = main.Main().Log()
 
     # This is the 'main' function of the extract class, this function will either extract all or extract only one file
-    def extract(self, filename, extract_path, download_path, ):
+    def extract(self, extract_path, download_path, ):
+        root = tkinter.Tk()
+        root.withdraw()
+        root.overrideredirect(True)
+        root.geometry('0x0+0+0')
+        root.deiconify()
+
+        root.lift()
+        root.attributes("-topmost", True)
+        root.focus_force()
         self.download_path = download_path
         self.extract_path = extract_path
-
-        if filename == '*':
-            self.extractAll()
-            self.Log.info('Extracting all tar.gz files')
-        else:
-            self.extractFile(os.path.join(self.download_path, filename))
+        filename = askopenfilenames(initialdir=self.download_path, filetypes=[('All files *.*','*.*'),('Tar GZ file', '*.tar.gz')], parent=root)
+        print(len(filename))
+        print(filename)
+        if len(filename) == 1:
+            self.extractFile(os.path.join(filename))
+            self.Log.info('Extracting filename')
+        elif len(filename)> 1:
+            self.extractAll(filename)
 
     # This function will extract a single tar.gz file
     def extractFile(self, file):
@@ -38,7 +51,7 @@ class FileExtraction:
                 Write_to_coe.write_to_coe(self.coe_output_file, 'extracting tar file:' + file)
 
                 temp = os.path.basename(file)
-                dirname = os.path.splitext(os.path.splitext(temp)[0])[0]
+                dirname = os.path.splitext(os.path.splitext(temp)[0])[0] + datetime.now().strftime('%Y-%m-%d')
                 finalPath = os.path.join(self.extract_path, dirname)
                 # check if the extraction path exists, if not create it
                 if not os.path.exists(finalPath):
@@ -60,17 +73,16 @@ class FileExtraction:
                     self.Log.warning('Stopping extraction script.')
 
     # this function will extract all tar.gz file by calling the extractfile function
-    def extractAll(self):
-        # will list all files in the directory
-        listOfFile = os.listdir(self.download_path)
-        for entry in listOfFile:
-            fullPath = os.path.join(self.download_path, entry)
-            if os.path.isdir(fullPath):
-                print('dir')
+    def extractAll(self, filename_tuple):
+
+        for entry in filename_tuple:
+            fullPath = os.path.join(entry)
+
             # simple check to see if the file ends with .tar.gz if so extract the file
-            elif fullPath.endswith('tar.gz'):
+            if fullPath.endswith('tar.gz'):
                 self.extractFile(fullPath)
             else:
+                print(entry)
                 print('this is not a tar.gz file, skipping')
 
     # this function will calculate the hash of the extracted files by calling the hashing function of the main class
