@@ -1,9 +1,9 @@
 import mailbox
 import os
 import main
-from resources import list_dir
 import csv
 import tkinter
+from resources import uniquify
 from tkinter.filedialog import askdirectory
 
 class Mail_analysis:
@@ -20,32 +20,31 @@ class Mail_analysis:
         root.withdraw()
         root.overrideredirect(True)
         root.geometry('0x0+0+0')
-        root.deiconify()
 
         root.lift()
         root.attributes("-topmost", True)
         root.focus_force()
 
         if os.listdir(self.mailbak_path):
+            # open tkinter file browser to select the maildir
             self.maildir = askdirectory(initialdir=self.mailbak_path, parent=root)
-            print(self.maildir)
+            # if the file selection has been cancelled by the user.
             if not self.maildir:
                 print('User cancelled folder selection returning to main')
                 self.log.info('User cancelled folder selection returning to main')
+            # Check if the folder maildir exist in the selected folder
             elif 'Maildir' in os.listdir(self.maildir):
                 self.output_name=os.path.basename(self.maildir)
                 self.log.info('Selecting maildir folder' + self.maildir)
                 self.show_mail(self.maildir)
+            # If there is no 'Maildir' in the selected folder
             elif 'Maildir' not in os.listdir(self.maildir):
                 print('That\'s not a Maildir.')
-                self.log.warning('None Maildir folder selected')
+
+                self.log.warning('None valid Maildir folder selected')
 
             root.destroy()
 
-        else:
-            # Give warning when the extraction folder is empty
-            print('The extraction folder is empty, please download and extract the back-up first')
-            self.log.warning('The extraction folder doesn\'t contain any files')
 
     # Write the mail to an csv file. And still needs some kind of analysis.
     def show_mail(self, maildir):
@@ -69,9 +68,12 @@ class Mail_analysis:
     def write_mail(self, message, message_nr, output_name):
         content = ''
         temp = self.output_name + output_name
-        with open(os.path.join(self.output_path, temp+'.csv'), 'a') as csv_file:
+        # create a unique output file
+        with open(uniquify.uniquify(os.path.join(self.output_path, temp+'.csv')), 'a') as csv_file:
             writer = csv.writer(csv_file)
+            # write the row diversions
             writer.writerow(['-------------------------------------'])
+            # write the message number
             writer.writerow(['Message Nr', message_nr])
             for key, value in message.items():
                 writer.writerow([key, value])
@@ -89,16 +91,6 @@ class Mail_analysis:
 
                 writer.writerow(['-------------------------------------'])
 
-                # print(content)
-                print()
-                # for part in message.get_payload():
-                #     print(part)
-                # ''.join(part.get_payload(decode=True) for part in
-                # content = message.get_payload()[0]
-                # print(content)
-                # # print(content)
-                # for char in content:
-                #     print(str(char))
             else:
                 content = message.get_payload(decode=True)
                 temp = ''
