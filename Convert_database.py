@@ -19,7 +19,6 @@ class database_analysis:
         root.withdraw()
         root.overrideredirect(True)
         root.geometry('0x0+0+0')
-        root.deiconify()
 
         root.lift()
         root.attributes("-topmost", True)
