@@ -9,6 +9,7 @@ from resources import uniquify
 class Log:
     def __init__(self):
         self.Log = main.Main().Log()
+
     # function to analyse the log files
     def analyse_log( self, logfile, filename, auth=False):
         # set the output path
