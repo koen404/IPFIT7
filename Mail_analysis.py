@@ -12,7 +12,7 @@ class Mail_analysis:
         self.casedir_path = casedir_path
         self.mailbak_path = os.path.join(casedir_path)
         self.log = main.Main().Log()
-        self.output_path = os.path.join(self.casedir_path, '..\output\mails')
+        self.output_path = os.path.join(self.casedir_path, '..', 'output', 'mails')
 
     # let the user select the correct maildir
     def load_maildir(self):
