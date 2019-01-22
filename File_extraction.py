@@ -31,7 +31,7 @@ class FileExtraction:
         print(len(filename))
         print(filename)
         if len(filename) == 1:
-            self.extractFile(os.path.join(filename))
+            self.extractFile(os.path.join(filename[0]))
             self.Log.info('Extracting filename')
         elif len(filename)> 1:
             self.extractAll(filename)
