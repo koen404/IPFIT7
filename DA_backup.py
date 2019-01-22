@@ -4,6 +4,7 @@ import os
 import main
 from contextlib import closing
 import Log_analysis
+import getpass
 from resources import uniquify, Write_to_coe
 
 
@@ -15,7 +16,6 @@ class DA_backup:
         self.main = main.Main()
         self.shell = None
         self.coe_output_file = Write_to_coe.get_coe_output(self.casedir)
-        print(self.coe_output_file)
 
     # function to create an back-up on the DA server. Will need the username hostname and password
     def back_up(self, host, username, password, backupuser=None):
@@ -33,7 +33,7 @@ class DA_backup:
             self.client.connect(hostname=host, port=13370, username=username, password=password)
             # TODO: move all input to main class
             # ask for root pass should be moved to the main class
-            root_pass = input('Please enter the root password of the server:')
+            root_pass = getpass.getpass('Please enter the root password of the server:')
             if backupuser != '':
                 message = 'Creating back-up for user: ' + backupuser
                 Write_to_coe.write_to_coe(self.coe_output_file, message)
