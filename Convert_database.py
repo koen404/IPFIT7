@@ -55,23 +55,7 @@ class database_analysis:
         os.system("./mysql2sqlite " + output_database.replace(' ', '\\ ') + ' > ' + temp)
         print("./mysql2sqlite " + output_database.replace(' ', '\\ ') + ' > ' + temp)
         self.run_sqliteBrowser(output_database)
-        # passwd= input('please enter the password of the IPFIT7 user')
-        # try:
-        #     self.con = pymysql.connect(host, user, passwd)
-        # except (pymysql.OperationalError) as e:
-        #     self.Log.error('An error occurred while connecting to the database:' + e)
-        #
-        # self.Log.info('Connecting to Local database')
-        # try:
-        #     mycursor =self.con.cursor()
-        #
-        # except (pymysql.MySQLError, pymysql.Warning) as e:
-        #     print(e)
-        #     self.Log.error('MySQL connection error: ' + e)
-        #     return None
-        #
-        # mycursor.execute("CREATE DATABASE IF NOT EXISTS " + output_database)
-        # subprocess.call(["mysql", "-u", user, "-p",passwd, output_database , '<', database_name])
+
 
     # this function will open the specified SQLite database in the SQLite browser
     def run_sqliteBrowser(self, database):
