@@ -3,6 +3,7 @@ import main
 from resources import list_dir
 import subprocess
 import tkinter
+import shutil
 from tkinter.filedialog import askopenfilename
 
 
@@ -42,15 +43,18 @@ class database_analysis:
 
         temp_path = os.path.abspath(self.casedir)
 
-        outpath = os.path.join(temp_path, "/output/database")
-        os.chdir(os.path.abspath(os.path.join(temp_path, '../', '../')))
+        outpath = os.path.join(temp_path, "output", "database")
+        os.chdir(os.path.abspath(os.path.join(temp_path, '..', '..', 'resources')))
+        print(os.getcwd())
         print(outpath)
         if not os.path.exists(outpath):
             os.makedirs(outpath)
             self.Log.info('Creating directory : ' + outpath)
 
-        output_database = os.path.join(outpath, output_database.replace('.sql', '.db'))
-        subprocess.check_call(["./resources/mysql2sqlite", database_name, '|', output_database], shell=True)
+        temp = os.path.join(outpath, output_database.replace('.sql', '.db')).replace(' ', '\\ ')
+
+        os.system("./mysql2sqlite " + output_database.replace(' ', '\\ ') + ' > ' + temp)
+        print("./mysql2sqlite " + output_database.replace(' ', '\\ ') + ' > ' + temp)
         self.run_sqliteBrowser(output_database)
         # passwd= input('please enter the password of the IPFIT7 user')
         # try:
