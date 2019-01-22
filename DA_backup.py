@@ -59,9 +59,12 @@ class DA_backup:
             stdin.write(root_pass+'\n')
             stdin.flush()
         except paramiko.ssh_exception.SSHException as e:
-            print('Connection failed')
+            print('####################################')
+            print('# ERROR CONNECTING TO HOST FAILED  #')
+            print('####################################')
+
             self.Log.error('Connecting to host Failed: ' + str(e))
-            print(e)
+            return None
 
     # this function will connect via ftp and download the created back-up file
     def download_backup(self, username, password, host, download_path):
