@@ -164,7 +164,7 @@ class DA_backup:
             stdin.write(rootPass + '\n')
             http_access_log = uniquify.uniquify(os.path.join(server_log_path, 'httpaccess.log'))
             self.Log.info('Writing phpMyadmin http_access.log to file: ' + http_access_log)
-            Write_to_coe.write_to_coe(self.coe_output_file, 'Writing phpMyadmin http_access.log to file: ' + http_access_log)
+            Write_to_coe.write_to_coe(self.coe_output_file, 'Writing http_access.log to file: ' + http_access_log)
 
             with open(http_access_log, 'w') as file:
                 for line in stdout.readlines():
