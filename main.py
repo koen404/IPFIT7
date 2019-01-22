@@ -116,6 +116,9 @@ class Main:
             self.sshpassword = getpass.getpass('Please enter the SSH password: ')
             self.backupuser = input('Please enter the user of which the back-up needs to be created, press enter for full back-up:')
             self.DA.back_up(self.host, self.sshusername, self.sshpassword, self.backupuser)
+            if self.DA.back_up(self.host, self.sshusername, self.sshpassword, self.backupuser) is None:
+                self.sshpassword = None
+
 
     # This function will call the download function from the DA_back-up class
     def download_back_up(self):
