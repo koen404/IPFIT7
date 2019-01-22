@@ -134,12 +134,14 @@ class DA_backup:
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
             self.client.connect(hostname=host, port=13370, username=username, password=password)
+            # log the host to which the script is connecting
             self.Log.info('Connecting via SSH to: ' + host)
             Write_to_coe.write_to_coe(self.coe_output_file, 'Connecting via SSH to: ' + host)
-
-            rootPass = input('Please enter the root password of the server:')
+            # this will prevent the rootpass from showing on screen.
+            rootPass = getpass.getpass('Please enter the root password of the server:')
             stdin, stdout, stderr = self.client.exec_command('su -c \" cat /var/www/html/phpMyAdmin/log/auth.log* \"')
             stdin.write(rootPass+'\n')
+            # create a unique output file for the auth log.
             auth_log = uniquify.uniquify(os.path.join(server_log_path, 'auth.log'))
             self.Log.info('Writing phpMyadmin auth.log to file: ' + auth_log)
             Write_to_coe.write_to_coe(self.coe_output_file, 'Writing phpMyadmin auth.log to file: ' + auth_log)
@@ -150,7 +152,7 @@ class DA_backup:
             # use cat to get the log files, because to access them you need root access.
             stdin, stdout, stderr = self.client.exec_command('su -c \" cat /var/log/secure* \"')
             stdin.write(rootPass + '\n')
-            # TODO: make the output filename variable and build in a check to detect if the filename already exist.
+            # write the output of the log to an unique file.
             secure_log = uniquify.uniquify(os.path.join(server_log_path, 'secure.log'))
             self.Log.info('Writing phpMyadmin secure.log to file: ' + secure_log)
             Write_to_coe.write_to_coe(self.coe_output_file, 'Writing phpMyadmin secure.log to file: ' + secure_log)
@@ -170,6 +172,7 @@ class DA_backup:
                 for line in stdout.readlines():
                     print(line)
                     file.write(line)
+            # analyse the written log files.
             Log_analysis.Log().analyse_log(secure_log, 'SSH_logins')
             Log_analysis.Log().analyse_log(http_access_log, 'PHP_MyADMin_logins')
             Log_analysis.Log().analyse_log(auth_log, 'PHP_MyADMin_logins', auth=True)
