@@ -3,7 +3,6 @@ import main
 from resources import list_dir
 import subprocess
 import tkinter
-import shutil
 from tkinter.filedialog import askopenfilename
 
 
