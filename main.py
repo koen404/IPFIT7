@@ -80,7 +80,7 @@ class Main:
         # if the path doesn't exist create it
         if not os.path.exists(self.download_path):
             os.makedirs(self.download_path)
-        print(os.path.abspath(os.path.join(self.casedir, '../', '../')))
+        print(os.path.abspath(os.path.join(self.casedir, '..', '..')))
         # set the extract path
         self.extract_path = os.path.join(self.casedir, 'extract')
         # set the log path
@@ -111,7 +111,7 @@ class Main:
             if self.sshpassword is not None:
                 self.DA.back_up(self.host, self.sshusername, self.sshpassword, self.backupuser)
         except AttributeError:
-            self.sshusername = 'koen'
+            self.sshusername = input('Please enter the SSH username: ')
             self.host = input('please enter the DirectAdmin host: ')
             self.sshpassword = getpass.getpass('Please enter the SSH password: ')
             self.backupuser = input('Please enter the user of which the back-up needs to be created, press enter for full back-up:')
@@ -122,12 +122,12 @@ class Main:
         try:
             if self.host is not None:
 
-                username = 'admin'
+                username = input('Please enter the FTP user: ')
                 ftppassword = getpass.getpass('FTP_password: ')
         except AttributeError:
 
             self.host = input('please enter host: ')
-            username = 'admin'
+            username = input('Please enter the FTP user: ')
             ftppassword = getpass.getpass('FTP_password: ')
 
         self.DA.download_backup(username, ftppassword, self.host, self.download_path)
@@ -139,7 +139,7 @@ class Main:
             if self.sshpassword is not None:
                 self.DA.download_log(self.sshusername, self.sshpassword, self.host, self.server_log_path)
         except AttributeError as e:
-            self.sshusername = 'koen'#input('Please enter the username')
+            self.sshusername = input('Please enter the SSH username')
             self.host = input('please enter the DirectAdmin host: ')
             self.sshpassword = getpass.getpass('Please enter the SSH password: ')
             self.DA.download_log(self.sshusername, self.sshpassword, self.host, self.server_log_path)
