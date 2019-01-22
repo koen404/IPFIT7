@@ -8,6 +8,7 @@ import csv
 import Mail_analysis
 import Convert_database
 from resources import Log
+import getpass
 
 
 class Main:
@@ -112,7 +113,7 @@ class Main:
         except AttributeError:
             self.sshusername = 'koen'
             self.host = input('please enter the DirectAdmin host: ')
-            self.sshpassword = input('Please enter the SSH password: ')
+            self.sshpassword = getpass.getpass('Please enter the SSH password: ')
             self.backupuser = input('Please enter the user of which the back-up needs to be created, press enter for full back-up:')
             self.DA.back_up(self.host, self.sshusername, self.sshpassword, self.backupuser)
 
@@ -122,12 +123,12 @@ class Main:
             if self.host is not None:
 
                 username = 'admin'
-                ftppassword = input('FTP_password: ')
+                ftppassword = getpass.getpass('FTP_password: ')
         except AttributeError:
 
             self.host = input('please enter host: ')
             username = 'admin'
-            ftppassword = input('FTP_password: ')
+            ftppassword = getpass.getpass('FTP_password: ')
 
         self.DA.download_backup(username, ftppassword, self.host, self.download_path)
 
@@ -140,7 +141,7 @@ class Main:
         except AttributeError as e:
             self.sshusername = 'koen'#input('Please enter the username')
             self.host = input('please enter the DirectAdmin host: ')
-            self.sshpassword = input('Please enter the SSH password: ')
+            self.sshpassword = getpass.getpass('Please enter the SSH password: ')
             self.DA.download_log(self.sshusername, self.sshpassword, self.host, self.server_log_path)
 
     # this function will start the extraction class
