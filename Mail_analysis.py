@@ -24,27 +24,29 @@ class Mail_analysis:
         root.lift()
         root.attributes("-topmost", True)
         root.focus_force()
+        if os.path.exists(self.mailbak_path):
+            if os.listdir(self.mailbak_path):
+                # open tkinter file browser to select the maildir
+                self.maildir = askdirectory(initialdir=self.mailbak_path, parent=root)
+                # if the file selection has been cancelled by the user.
+                if not self.maildir:
+                    print('User cancelled folder selection returning to main')
+                    self.log.info('User cancelled folder selection returning to main')
+                # Check if the folder maildir exist in the selected folder
+                elif 'Maildir' in os.listdir(self.maildir):
+                    self.output_name=os.path.basename(self.maildir)
+                    self.log.info('Selecting maildir folder' + self.maildir)
+                    self.show_mail(self.maildir)
+                # If there is no 'Maildir' in the selected folder
+                elif 'Maildir' not in os.listdir(self.maildir):
+                    print('That\'s not a Maildir.')
 
-        if os.listdir(self.mailbak_path):
-            # open tkinter file browser to select the maildir
-            self.maildir = askdirectory(initialdir=self.mailbak_path, parent=root)
-            # if the file selection has been cancelled by the user.
-            if not self.maildir:
-                print('User cancelled folder selection returning to main')
-                self.log.info('User cancelled folder selection returning to main')
-            # Check if the folder maildir exist in the selected folder
-            elif 'Maildir' in os.listdir(self.maildir):
-                self.output_name=os.path.basename(self.maildir)
-                self.log.info('Selecting maildir folder' + self.maildir)
-                self.show_mail(self.maildir)
-            # If there is no 'Maildir' in the selected folder
-            elif 'Maildir' not in os.listdir(self.maildir):
-                print('That\'s not a Maildir.')
+                    self.log.warning('None valid Maildir folder selected')
 
-                self.log.warning('None valid Maildir folder selected')
-
-            root.destroy()
-
+                root.destroy()
+        else:
+            print('The back-up file hasn\'t been extracted, please run the extraction option (3)')
+            self.log.warning('Back-up file hasn\'t been extracted')
 
     # Write the mail to an csv file. And still needs some kind of analysis.
     def show_mail(self, maildir):
@@ -134,12 +136,13 @@ class Mail_analysis:
                     print("No e-mails found")
                     self.log.info("No e-mail messages found")
 
-            if message.get_content_maintype() == 'multipart' and val == 2:
-                output_name = output_name+'_at'
-                self.write_mail(message, counter, output_name)
+            if message.get_content_type() == 'multipart/mixed' and val == 2:
+                finaloutput = output_name+'_at'
+                self.write_mail(message, counter, finaloutput)
                 counter += 1
 
                 for part in message.walk():
+                    print(part.get_content_maintype())
                     if part.get_content_maintype() == 'multipart':
                         continue
                     if part.get('Content-Disposition') is None:
