@@ -52,7 +52,7 @@ class database_analysis:
 
         temp = os.path.join(outpath, output_database.replace('.sql', '.db')).replace(' ', '\\ ')
 
-        os.system("./mysql2sqlite " + output_database.replace(' ', '\\ ') + ' > ' + temp)
+        os.system("./mysql2sqlite " + output_database.replace(' ', '\\ ') + ' | sqlite3' + temp)
         print("./mysql2sqlite " + output_database.replace(' ', '\\ ') + ' > ' + temp)
         self.run_sqliteBrowser(output_database)
 
