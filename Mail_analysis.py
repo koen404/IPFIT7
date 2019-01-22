@@ -135,7 +135,7 @@ class Mail_analysis:
                 else:
                     print("No e-mails found")
                     self.log.info("No e-mail messages found")
-
+            # Check if the message is mulitpart/mixed otherwise it would cause false positives
             if message.get_content_type() == 'multipart/mixed' and val == 2:
                 finaloutput = output_name+'_at'
                 self.write_mail(message, counter, finaloutput)
