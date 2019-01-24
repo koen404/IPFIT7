@@ -109,14 +109,16 @@ class Main:
         # check if the host, userneme and password already have been set if not set them
         try:
             if self.sshpassword is not None:
-                self.DA.back_up(self.host, self.sshusername, self.sshpassword, self.backupuser)
+                self.DA.back_up(self.host, self.sshusername, self.sshpassword, self.rootpassword, self.backupuser)
         except AttributeError:
             self.sshusername = input('Please enter the SSH username: ')
             self.host = input('please enter the DirectAdmin host: ')
             self.sshpassword = getpass.getpass('Please enter the SSH password: ')
+            self.rootpassword = getpass.getpass('Please enter the root password of the server:')
+
             self.backupuser = input('Please enter the user of which the back-up needs to be created, press enter for full back-up:')
-            self.DA.back_up(self.host, self.sshusername, self.sshpassword, self.backupuser)
-            if self.DA.back_up(self.host, self.sshusername, self.sshpassword, self.backupuser) is None:
+            self.DA.back_up(self.host, self.sshusername, self.sshpassword, self.rootpassword, self.backupuser)
+            if self.DA.back_up(self.host, self.sshusername, self.sshpassword, self.rootpassword, self.backupuser) is None:
                 self.sshpassword = None
 
 
