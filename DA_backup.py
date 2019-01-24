@@ -18,8 +18,9 @@ class DA_backup:
         self.coe_output_file = Write_to_coe.get_coe_output(self.casedir)
 
     # function to create an back-up on the DA server. Will need the username hostname and password
-    def back_up(self, host, username, password, backupuser=None):
+    def back_up(self, host, username, sshpassword, rootpassword, backupuser=None):
         # instantiate the paramiko ssh client
+        root_pass = rootpassword
         self.client = paramiko.SSHClient()
         # this will automatically add the host keys of the server.
         # If the keys aren't present paramiko will raise an error
@@ -30,10 +31,9 @@ class DA_backup:
             Write_to_coe.write_to_coe(self.coe_output_file, message)
             self.Log.info(message)
             # connect with the SSH host
-            self.client.connect(hostname=host, port=13370, username=username, password=password)
+            self.client.connect(hostname=host, port=13370, username=username, password=sshpassword)
             # TODO: move all input to main class
             # ask for root pass should be moved to the main class
-            root_pass = getpass.getpass('Please enter the root password of the server:')
             if backupuser != '':
                 message = 'Creating back-up for user: ' + backupuser
                 Write_to_coe.write_to_coe(self.coe_output_file, message)
