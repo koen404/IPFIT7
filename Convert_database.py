@@ -56,8 +56,8 @@ class database_analysis:
             self.Log.info('Creating directory : ' + outpath)
 
         temp = os.path.join(outpath, output_database.replace('.sql', '.db')).replace(' ', '\\ ')
-
-        os.system("./mysql2sqlite " + output_database.replace(' ', '\\ ') + ' | sqlite3' + temp)
+        print(temp)
+        os.system("./mysql2sqlite " + output_database.replace(' ', '\\ ') + ' | sqlite3 ' + temp)
         self.run_sqliteBrowser(output_database)
 
 
