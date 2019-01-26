@@ -1,7 +1,6 @@
 import re
 import os
 import csv
-from resources import Write_to_coe
 import main
 from collections import Counter
 from resources import uniquify
@@ -11,7 +10,7 @@ class Log:
         self.Log = main.Main().Log()
 
     # function to analyse the log files
-    def analyse_log( self, logfile, filename, auth=False):
+    def analyse_log(self, logfile, filename, auth=False):
         # set the output path
         abs_path = os.path.abspath(os.path.dirname(logfile))
         os.chdir(abs_path)
@@ -35,7 +34,6 @@ class Log:
                 for line in file:
                     # check if it is a failed or an successful login
                     if 'Accepted' in line:
-                        print (line)
                         ip = self.getIP(line)
                         successfull_ip.append(ip)
                         line = line.replace(ip, 'IP')
@@ -57,7 +55,6 @@ class Log:
                     # check if someone logged in successfully to PHPMyAdmin
                     if 'POST /phpmyadmin/ajax.php' in line:
                         ip = self.getIP(line, pop_index=0)
-                        print(ip)
                         line = line.replace(ip, '')
                         # regex to extract the date from the log file
                         date = re.search('(([0-2][0-9]|(3)[0-1])(\/)(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\/)\d{4}:(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d))', line).group()
@@ -74,7 +71,7 @@ class Log:
                     line = line.replace(date, '')
                 self.write_ip(failed_ip, output_file, 'Failed IP')
 
-    def output_log(self, file,  IP, date='', log_message='', log_message3=''):
+    def output_log(self, file, IP, date='', log_message='', log_message3=''):
         if not os.path.exists(file):
             output = open(file, 'w')
             filewriter = csv.writer(output, delimiter=',',
