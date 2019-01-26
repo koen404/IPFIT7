@@ -26,10 +26,10 @@ class database_analysis:
         root.lift()
         root.attributes("-topmost", True)
         root.focus_force()
-
-
-        first = askopenfilename(initialdir=self.extract_path, filetypes=[('Sql files', '*.sql')], parent = root)
+        database_location = os.path.join(self.casedir, 'extract')
+        first = askopenfilename(initialdir=database_location, filetypes=[('Sql files', '*.sql')], parent = root)
         print(first)
+
         if first is None or not os.path.exists(first):
             print('Selection cancelled by user')
             self.Log.warning('Selection of database cancelled by user')
