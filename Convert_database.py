@@ -30,7 +30,7 @@ class database_analysis:
 
         first = askopenfilename(initialdir=self.extract_path, filetypes=[('Sql files', '*.sql')], parent = root)
         print(first)
-        if first is None:
+        if first is None or not os.path.exists(first):
             print('Selection cancelled by user')
             self.Log.warning('Selection of database cancelled by user')
         if first.endswith('.sql'):
@@ -42,6 +42,7 @@ class database_analysis:
 
     # this function will convert the specified database dump to SQLite format
     def convert_database(self, database_name):
+
         Write_to_coe.write_to_coe(self.coe_output_file, 'Converting database to sqlite:' + database_name)
         output_database = os.path.basename(database_name)
 
