@@ -50,14 +50,15 @@ class DA_backup:
             # input the root password
             stdin.write(root_pass+'\n')
             stdin.flush()
-            print(stdout.readlines())
             # this command will force the back-up command to run.
             self.Log.info('Forcing back-up command')
             checkcommand = '/usr/local/directadmin/dataskq d200'
             # run the force command
             stdin, stdout, stderr = self.client.exec_command('su -c \"' + checkcommand + '\"')
             stdin.write(root_pass+'\n')
+
             stdin.flush()
+            print('Back-up script completed!')
         except paramiko.ssh_exception.SSHException as e:
             print('####################################')
             print('# ERROR CONNECTING TO HOST FAILED  #')
@@ -179,6 +180,7 @@ class DA_backup:
             Log_analysis.Log().analyse_log(secure_log, 'SSH_logins')
             Log_analysis.Log().analyse_log(http_access_log, 'PHP_MyADMin_logins')
             Log_analysis.Log().analyse_log(auth_log, 'PHP_MyADMin_logins', auth=True)
+            print("Log analysis completed!")
         # except all ssh exceptions.
         except paramiko.ssh_exception.SSHException as e:
             print(e)
