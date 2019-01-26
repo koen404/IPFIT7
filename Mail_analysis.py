@@ -4,6 +4,7 @@ import main
 import csv
 import tkinter
 from resources import uniquify
+from resources import Write_to_coe
 from tkinter.filedialog import askdirectory
 
 class Mail_analysis:
@@ -12,6 +13,7 @@ class Mail_analysis:
         self.casedir_path = casedir_path
         self.mailbak_path = os.path.join(casedir_path)
         self.log = main.Main().Log()
+        self.coe_output_file = Write_to_coe.get_coe_output(casedir_path)
         self.output_path = os.path.join(self.casedir_path, '..', 'output', 'mails')
 
     # let the user select the correct maildir
@@ -36,6 +38,7 @@ class Mail_analysis:
                 elif 'Maildir' in os.listdir(self.maildir):
                     self.output_name=os.path.basename(self.maildir)
                     self.log.info('Selecting maildir folder' + self.maildir)
+                    Write_to_coe.write_to_coe(self.coe_output_file, 'Maildir folder opened: ' + self.maildir)
                     self.show_mail(self.maildir)
                 # If there is no 'Maildir' in the selected folder
                 elif 'Maildir' not in os.listdir(self.maildir):
@@ -68,6 +71,7 @@ class Mail_analysis:
 
     # Write the mail to a CSV file
     def write_mail(self, message, message_nr, output_name):
+        Write_to_coe.write_to_coe(self.coe_output_file, 'Writing email to:' + output_name)
         content = ''
         temp = self.output_name + output_name
         # create a unique output file
