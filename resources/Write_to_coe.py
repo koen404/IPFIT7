@@ -5,7 +5,6 @@ import os
 
 # This function will write the message and hash to the specified output file
 def write_to_coe(output_file, message, hash=''):
-    print(output_file)
     with open(output_file, 'a') as file:
         filewriter = csv.writer(file, delimiter=',',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -19,5 +18,4 @@ def get_coe_output(casedir):
         os.makedirs(temp)
 
     coe_output_file = os.path.join(temp, 'coe.csv')
-    print(coe_output_file)
     return coe_output_file
