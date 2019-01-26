@@ -57,8 +57,9 @@ class database_analysis:
 
         temp = os.path.join(outpath, output_database.replace('.sql', '.db')).replace(' ', '\\ ')
         print(temp)
-        os.system("./mysql2sqlite " + output_database.replace(' ', '\\ ') + ' | sqlite3 ' + temp)
-        self.run_sqliteBrowser(output_database)
+        print(os.getcwd())
+        os.system("./mysql2sqlite " + database_name.replace(' ', '\\ ') + ' | sqlite3 ' + temp)
+        self.run_sqliteBrowser(temp)
 
 
     # this function will open the specified SQLite database in the SQLite browser
