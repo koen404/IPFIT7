@@ -152,8 +152,7 @@ class Main:
     # this function will start the extraction class
     def file_extraction(self):
         # should change this so it's less prone to user error
-        print(self.extract_path)
-        print(self.download_path)
+        print("Extracting to:" + self.extract_path)
         File_extraction.FileExtraction(self.casedir).extract(self.extract_path, self.download_path)
 
     # This function will create the COE file. If it already exists it will use the existing file.
@@ -178,29 +177,16 @@ class Main:
                 filewriter.writerow([])
                 filewriter.writerow(['When', 'What', 'Hash'])
         else:
-            i = 0
-            with open(self.coe_output_file, 'r') as file:
-                readCSV = csv.reader(file, delimiter=',',
+            with open(self.coe_output_file, 'a') as file:
+                filewriter = csv.writer(file, delimiter=',',
                                         quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                for row in readCSV:
-                    if i == 0:
-                        temp_name = row[1]
-                        print(temp_name)
-
-                    i += 1
-            temp_name = str(temp_name).upper()
-            if self.examiner.upper() == temp_name:
-                self.Log().info('COE file already exist')
-            else:
-                with open(self.coe_output_file, 'a') as file:
-                    filewriter = csv.writer(file, delimiter=',',
-                                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                    # filewriter.writerow()
-                    filewriter.writerow(['New Examiner', self.examiner])
+                filewriter.writerow([''])
+                filewriter.writerow(['Examiner: ', self.examiner])
+                filewriter.writerow(['When', 'What', 'Hash'])
 
     # This function will run the mail analysis class
     def mail_analysis(self):
-        print('mail analysis')
+        print('Starting mail analysis')
         Mail_analysis.Mail_analysis(self.extract_path).load_maildir()
 
     # This function will run the database restore and analysis function from the restore_database class
@@ -209,7 +195,7 @@ class Main:
 
     # This function will stop the program from running
     def quit(self):
-        self.Log().info("Exiting script")
+        self.Log().info("Exiting script...")
         sys.exit(0)
 
 # This if statement will cause the run function to keep running
